@@ -53,6 +53,6 @@ if __name__ == '__main__':
     idList1 = characters + numbers
     idList = idList1 + idList2 + idList3
     for id in idList:
-        print id, cCH.getChemCompIdSite(id)
+        print(id, cCH.getChemCompIdSite(id))
     #
     #

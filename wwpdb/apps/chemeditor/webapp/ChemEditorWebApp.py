@@ -21,22 +21,26 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, sys, time, types, string, traceback, ntpath, threading, shutil
-from json import loads, dumps
-from time import localtime, strftime
+import os
+import sys
+import traceback
+import types
 
-from wwpdb.utils.config.ConfigInfo                  import ConfigInfo
-from wwpdb.apps.chemeditor.webapp.AtomMatch       import AtomMatch
-from wwpdb.apps.chemeditor.webapp.ChemCompHash    import ChemCompHash
-from wwpdb.apps.chemeditor.webapp.CVSCommit       import CVSBase,CVSCommit
-from wwpdb.apps.chemeditor.webapp.Get2D           import Get2D
-from wwpdb.apps.chemeditor.webapp.GetLigand       import GetLigand
-from wwpdb.apps.chemeditor.webapp.SaveLigand      import SaveLigand
-from wwpdb.apps.chemeditor.webapp.Search          import Search
-from wwpdb.apps.chemeditor.webapp.UpdateLigand    import UpdateLigand
-from wwpdb.apps.chemeditor.webapp.Upload          import Upload
-from wwpdb.io.file.mmCIFUtil                   import mmCIFUtil
-from wwpdb.utils.session.WebRequest                  import InputRequest,ResponseContent
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
+from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
+
+from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
+from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSBase, CVSCommit
+from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
+from wwpdb.apps.chemeditor.webapp.Get2D import Get2D
+from wwpdb.apps.chemeditor.webapp.GetLigand import GetLigand
+from wwpdb.apps.chemeditor.webapp.SaveLigand import SaveLigand
+from wwpdb.apps.chemeditor.webapp.Search import Search
+from wwpdb.apps.chemeditor.webapp.UpdateLigand import UpdateLigand
+from wwpdb.apps.chemeditor.webapp.Upload import Upload
+
+
 #
 
 class ChemEditorWebApp(object):

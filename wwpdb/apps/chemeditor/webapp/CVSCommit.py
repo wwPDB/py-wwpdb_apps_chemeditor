@@ -22,12 +22,13 @@ __version__   = "V0.07"
 
 import os, shutil, string, sys, traceback
 
-from mmcif.api.PdbxContainers                   import *
+from mmcif.api.PdbxContainers                  import *
+from mmcif.api.DataCategory                    import DataCategory
 from mmcif.io.PdbxReader                       import PdbxReader
 from mmcif.io.PdbxWriter                       import PdbxWriter
-from wwpdb.utils.config.ConfigInfo                  import ConfigInfo
+from wwpdb.utils.config.ConfigInfo             import ConfigInfo
 from wwpdb.io.file.mmCIFUtil                   import mmCIFUtil
-from wwpdb.utils.rcsb.CvsAdmin                    import CvsSandBoxAdmin
+from wwpdb.io.cvs.CvsAdmin                     import CvsSandBoxAdmin
 
 class CVSBase(object):
     """  Class handle CVS commit to chemical component dictionary
@@ -497,7 +498,7 @@ if __name__ == '__main__':
     myReqObj.setValue("SITE_REFDATA_CVS_PASSWORD", "lig1234")
     testUtil = CVSBase(reqObj=myReqObj, verbose = True, log = sys.stderr)
     rtn_text = testUtil.cvsCommit('SO4', '/net/users/zfeng/SO4.cif')
-    print 'rtn_text=' + rtn_text
+    print('rtn_text=' + rtn_text)
     rtn_text = testUtil.cvsCommit('ZAG', '/net/users/zfeng/ZAG.cif')
-    print 'rtn_text=' + rtn_text
+    print ('rtn_text=' + rtn_text)
 
