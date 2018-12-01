@@ -55,7 +55,7 @@ class GetLigand(object):
         #
         if (self.__verbose):
             self.__lfh.write("+GetLigand.GetResult() - found %s\n" % filePath)
-        f = file(filePath, 'r')
+        f = open(filePath, 'r')
         data = f.read()
         f.close()
         #if (self.__verbose):

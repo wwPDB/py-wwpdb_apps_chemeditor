@@ -20,9 +20,10 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, sys, string, traceback
+import os
+import sys
 
-from mmcif.api.PdbxContainers     import *
+#from mmcif.api.PdbxContainers     import *
 from mmcif.io.PdbxReader         import PdbxReader
 from mmcif.io.PdbxWriter         import PdbxWriter
 from wwpdb.utils.config.ConfigInfo    import ConfigInfo
@@ -76,7 +77,7 @@ class UpdateLigand(object):
     def __getInputCifData(self):
         cif = self.__reqObj.getValue('cif')
         filePath = os.path.join(self.__sessionPath,'in.cif')
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write(cif + '\n')
         f.close()
 
@@ -105,7 +106,7 @@ class UpdateLigand(object):
             return
         #
         script = os.path.join(self.__sessionPath, 'update-comp.csh')
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv CC_TOOLS   ' + self.__cI.get('SITE_CC_APPS_PATH') + '/bin\n')
@@ -198,7 +199,7 @@ class UpdateLigand(object):
         if not os.access(filePath, os.R_OK):
             return ''
         #
-        f = file(filePath, 'r')
+        f = open(filePath, 'r')
         data = f.read()
         f.close()
         return data

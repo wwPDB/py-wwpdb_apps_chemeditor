@@ -20,9 +20,9 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, shutil, sys, string, traceback
+import os, shutil, sys
 
-from wwpdb.utils.config.ConfigInfo                             import ConfigInfo
+from wwpdb.utils.config.ConfigInfo                           import ConfigInfo
 from wwpdb.apps.ccmodule.io.ChemCompAssignDataStore          import ChemCompAssignDataStore
 from wwpdb.apps.ccmodule.reports.ChemCompAlignImageGenerator import ChemCompAlignImageGenerator
 
@@ -88,7 +88,7 @@ class SaveLigand(object):
     def __getInputCifData(self):
         cif = self.__reqObj.getValue('cif')
         filePath = os.path.join(self.__sessionPath, self.__instanceId, 'in.cif')
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write(cif + '\n')
         f.close()
 
@@ -98,7 +98,7 @@ class SaveLigand(object):
             return
         #
         script = os.path.join(self.__sessionPath, self.__instanceId, 'update-comp.csh')
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv CC_TOOLS   ' + self.__cI.get('SITE_CC_APPS_PATH') + '/bin\n')

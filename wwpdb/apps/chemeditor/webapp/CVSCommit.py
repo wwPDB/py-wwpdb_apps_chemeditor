@@ -20,15 +20,19 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, shutil, string, sys, traceback
+import os
+import shutil
+import traceback
+import sys
 
-from mmcif.api.PdbxContainers                  import *
-from mmcif.api.DataCategory                    import DataCategory
-from mmcif.io.PdbxReader                       import PdbxReader
-from mmcif.io.PdbxWriter                       import PdbxWriter
-from wwpdb.utils.config.ConfigInfo             import ConfigInfo
-from wwpdb.io.file.mmCIFUtil                   import mmCIFUtil
-from wwpdb.io.cvs.CvsAdmin                     import CvsSandBoxAdmin
+# from mmcif.api.PdbxContainers                  import *
+from mmcif.api.DataCategory import DataCategory
+from mmcif.io.PdbxReader import PdbxReader
+from mmcif.io.PdbxWriter import PdbxWriter
+from wwpdb.io.cvs.CvsAdmin import CvsSandBoxAdmin
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
+
 
 class CVSBase(object):
     """  Class handle CVS commit to chemical component dictionary
@@ -226,7 +230,7 @@ class CVSCommit(CVSBase):
         if (not self.__sourceFile) or (not self.__cif):
             return 'CVS commit failed'
         #
-        f = file(self.__sourceFile, 'w')
+        f = open(self.__sourceFile, 'w')
         f.write(self.__cif + '\n')
         f.close()
         if not os.access(self.__sourceFile, os.R_OK):
@@ -237,7 +241,7 @@ class CVSCommit(CVSBase):
         """ Run syntax checking
         """
         script = os.path.join(self._sessionPath, 'precheckComp.csh')
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('setenv RCSBROOT   ' + self._cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')
         f.write('setenv BINPATH ${RCSBROOT}/bin\n')
@@ -251,13 +255,13 @@ class CVSCommit(CVSBase):
         message = ''
         filePath = os.path.join(self._sessionPath, 'precheckComp.log')
         if os.access(filePath, os.R_OK):
-            f = file(filePath, 'r')
+            f = open(filePath, 'r')
             data = f.read()
             f.close()
             if data:
                 message = 'yes'
                 filePath = os.path.join(self._sessionPath, 'error1.html')
-                f = file(filePath, 'w')
+                f = open(filePath, 'w')
                 f.write('<html>\n')
                 f.write('<body>\n')
                 f.write('<br><br>\n')
@@ -276,7 +280,7 @@ class CVSCommit(CVSBase):
         """ Run dictionary checking
         """
         script = os.path.join(self._sessionPath, 'checkComp.csh')
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv CC_TOOLS   ' + self._cI.get('SITE_CC_APPS_PATH') + '/bin\n')
@@ -302,7 +306,7 @@ class CVSCommit(CVSBase):
         message = ''
         filePath = os.path.join(self._sessionPath, self.__id + '.report')
         if os.access(filePath, os.R_OK):
-            f = file(filePath, 'r')
+            f = open(filePath, 'r')
             data = f.read()
             f.close()
             if data:
@@ -327,7 +331,7 @@ class CVSCommit(CVSBase):
         """ Run duplicate checking
         """
         script = os.path.join(self._sessionPath, 'matchComp.csh')
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv CC_TOOLS ' + self._cI.get('SITE_CC_APPS_PATH') + '/bin\n')
@@ -347,7 +351,7 @@ class CVSCommit(CVSBase):
         message = ''
         filePath = os.path.join(self._sessionPath, self.__id + '.match')
         if os.access(filePath, os.R_OK):
-            f = file(filePath, 'r')
+            f = open(filePath, 'r')
             data = f.read()
             f.close()
             if data:
@@ -397,7 +401,7 @@ class CVSCommit(CVSBase):
         myD['error'] = error_msg
         #
         filePath = os.path.join(self._sessionPath, 'error2.html')
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write(self.__processTemplate('cvs_commit_tmplt.html', myD) + '\n')
         f.close()
         return 'yes'
@@ -487,6 +491,7 @@ class CVSCommit(CVSBase):
         sIn=ifh.read()
         ifh.close()
         return (  sIn % parameterDict )
+
 
 if __name__ == '__main__':
     from wwpdb.utils.session.WebRequest                  import InputRequest

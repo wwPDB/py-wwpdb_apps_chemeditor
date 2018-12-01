@@ -20,7 +20,7 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, sys, string, traceback
+import os, sys
 
 from wwpdb.utils.config.ConfigInfo  import ConfigInfo
 
@@ -65,14 +65,14 @@ class Get2D(object):
     def __getInputSdfData(self):
         sdf = self.__reqObj.getValue('sdf')
         filePath = os.path.join(self.__sessionPath,'in.sdf')
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write(sdf + '\n')
         f.close()
 
     def __getCACTVSScript(self):
         hflag = str(self.__reqObj.getValue('hflag'))
         filePath = os.path.join(self.__sessionPath,'script')
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write('set ehandle [molfile read in.sdf]\n')
         if hflag == 'yes':
             f.write('ens hadd $ehandle\n')
@@ -91,7 +91,7 @@ class Get2D(object):
 
     def __runCACTVSScript(self):
         filePath = os.path.join(self.__sessionPath, 'get2d.csh')
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv CACTVS_ROOT ' + self.__cI.get('SITE_CC_CACTVS_DIR') + '\n')
@@ -105,7 +105,7 @@ class Get2D(object):
         data = ''
         filePath = os.path.join(self.__sessionPath, 'out.sdf')
         if os.access(filePath, os.R_OK):
-            f = file(filePath, 'r')
+            f = open(filePath, 'r')
             data = f.read()
             f.close()
         return data

@@ -20,12 +20,16 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, sys, string, traceback
+import os
+import sys
 
-from wwpdb.utils.config.ConfigInfo  import ConfigInfo
-from wwpdb.apps.chemeditor.webapp.CVSCommit  import CVSBase
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
+
+from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSBase
+
 
 #
+
 
 class AtomMatch(object):
     """ 
@@ -65,7 +69,7 @@ class AtomMatch(object):
     def __getInputCifData(self):
         cif = self.__reqObj.getValue('cif')
         filePath = os.path.join(self.__sessionPath,'in.cif')
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write(cif + '\n')
         f.close()
 
@@ -86,7 +90,7 @@ class AtomMatch(object):
             return
         #
         script = os.path.join(self.__sessionPath, 'match.csh')
-        f = file(script, 'w')
+        f = open(script, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
         f.write('setenv RCSBROOT   ' + self.__cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')
@@ -108,7 +112,7 @@ class AtomMatch(object):
         if not os.access(filePath, os.R_OK):
             return ''
         #
-        f = file(filePath, 'r')
+        f = open(filePath, 'r')
         data = f.read()
         f.close()
         #

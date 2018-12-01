@@ -330,7 +330,7 @@ class ChemEditorWebAppWorker(object):
         data = data.replace('\r', '\n')
         fileId = str(self.__reqObj.getValue('downloadName'))
         filePath = os.path.join(sessionPath, fileId)
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write(data + '\n')
         f.close()
         #
@@ -365,7 +365,7 @@ class ChemEditorWebAppWorker(object):
         code = ''
         filePath = os.path.join(self.__cI.get('SITE_DEPLOY_PATH'), 'reference', 'id_codes', 'unusedCodes.lst')
         self.__lfh.write("+ChemEditorWebAppWorker.__getNewCodeFromList filePath=%s\n" % filePath)
-        f = file(filePath, 'r')
+        f = open(filePath, 'r')
         data = f.read()
         f.close()
         #
@@ -383,7 +383,7 @@ class ChemEditorWebAppWorker(object):
             #
         #
         data = '\n'.join(idlist[idx:])
-        f = file(filePath, 'w')
+        f = open(filePath, 'w')
         f.write(data)
         f.close()
         return code

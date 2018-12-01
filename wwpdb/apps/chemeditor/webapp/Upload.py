@@ -20,7 +20,8 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os, sys, string, traceback
+import os, sys, traceback
+import ntpath
 
 from wwpdb.utils.config.ConfigInfo  import ConfigInfo
 
@@ -102,7 +103,7 @@ class Upload(object):
         #
         filePath = os.path.join(self.__sessionPath, self.__fileName)
         if os.access(filePath, os.R_OK):
-            f = file(filePath, 'r')
+            f = open(filePath, 'r')
             data = f.read()
             f.close()
         return data
