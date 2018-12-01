@@ -22,12 +22,12 @@ __version__   = "V0.07"
 
 import os, sys, string, traceback
 
-from pdbx.reader.PdbxContainers     import *
-from pdbx.reader.PdbxReader         import PdbxReader
-from pdbx.writer.PdbxWriter         import PdbxWriter
-from wwpdb.api.facade.ConfigInfo    import ConfigInfo
+from mmcif.api.PdbxContainers     import *
+from mmcif.io.PdbxReader         import PdbxReader
+from mmcif.io.PdbxWriter         import PdbxWriter
+from wwpdb.utils.config.ConfigInfo    import ConfigInfo
 from wwpdb.apps.chemeditor.webapp.CVSCommit       import CVSBase
-from wwpdb.utils.rcsb.mmCIFUtil                   import mmCIFUtil
+from wwpdb.io.file.mmCIFUtil                   import mmCIFUtil
 
 class UpdateLigand(object):
     """ 

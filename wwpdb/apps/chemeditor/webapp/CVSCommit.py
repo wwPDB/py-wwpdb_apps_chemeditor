@@ -22,11 +22,11 @@ __version__   = "V0.07"
 
 import os, shutil, string, sys, traceback
 
-from pdbx.reader.PdbxContainers                   import *
-from pdbx.reader.PdbxReader                       import PdbxReader
-from pdbx.writer.PdbxWriter                       import PdbxWriter
-from wwpdb.api.facade.ConfigInfo                  import ConfigInfo
-from wwpdb.utils.rcsb.mmCIFUtil                   import mmCIFUtil
+from mmcif.api.PdbxContainers                   import *
+from mmcif.io.PdbxReader                       import PdbxReader
+from mmcif.io.PdbxWriter                       import PdbxWriter
+from wwpdb.utils.config.ConfigInfo                  import ConfigInfo
+from wwpdb.io.file.mmCIFUtil                   import mmCIFUtil
 from wwpdb.utils.rcsb.CvsAdmin                    import CvsSandBoxAdmin
 
 class CVSBase(object):
@@ -488,7 +488,7 @@ class CVSCommit(CVSBase):
         return (  sIn % parameterDict )
 
 if __name__ == '__main__':
-    from wwpdb.utils.rcsb.WebRequest                  import InputRequest
+    from wwpdb.utils.session.WebRequest                  import InputRequest
     siteId = 'WWPDB_DEPLOY_TEST_RU'
     os.environ["WWPDB_SITE_ID"] = siteId
     myReqObj = InputRequest({}, verbose = True, log = sys.stderr)

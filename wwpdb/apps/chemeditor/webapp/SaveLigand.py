@@ -22,7 +22,7 @@ __version__   = "V0.07"
 
 import os, shutil, sys, string, traceback
 
-from wwpdb.api.facade.ConfigInfo                             import ConfigInfo
+from wwpdb.utils.config.ConfigInfo                             import ConfigInfo
 from wwpdb.apps.ccmodule.io.ChemCompAssignDataStore          import ChemCompAssignDataStore
 from wwpdb.apps.ccmodule.reports.ChemCompAlignImageGenerator import ChemCompAlignImageGenerator
 
