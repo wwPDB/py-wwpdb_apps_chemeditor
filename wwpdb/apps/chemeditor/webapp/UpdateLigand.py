@@ -46,8 +46,8 @@ class UpdateLigand(object):
         self.__pdbId = str(self.__reqObj.getValue('pdbid')).upper()
         self.__annotator = str(self.__reqObj.getValue('annotator'))
         self.__processing_site = str(self.__reqObj.getValue('processingsite'))
-        if not self.__processing_site or self.__processing_site == 'null':
-            self.__processing_site = 'RCSB'
+        if (not self.__processing_site) or (self.__processing_site == 'null') or (self.__processing_site == 'NULL'):
+            self.__processing_site = self.__cI.get('SITE_NAME').upper()
         #
         self.__instanceid = str(self.__reqObj.getValue('instanceid'))
         self.__cclinkFile = ''
