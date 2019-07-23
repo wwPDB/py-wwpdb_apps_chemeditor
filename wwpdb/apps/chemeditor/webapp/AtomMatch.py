@@ -20,99 +20,49 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
-import os
-import sys
+import os,sys
 
-from wwpdb.utils.config.ConfigInfo import ConfigInfo
+from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 
-from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSBase
-
-
-#
-
-
-class AtomMatch(object):
+class AtomMatch(ChemEditorBase):
     """ 
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__reqObj=reqObj
-        self.__sObj=None
-        self.__sessionId=None
-        self.__sessionPath=None
-        self.__rltvSessionPath=None
-        self.__siteId  = str(self.__reqObj.getValue('WWPDB_SITE_ID'))
-        self.__cI=ConfigInfo(self.__siteId)
+        super(AtomMatch, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
         #
-        self.__getSession()
-        #
-
-    def __getSession(self):
-        """ Join existing session or create new session as required.
-        """
-        #
-        self.__sObj=self.__reqObj.newSessionObj()
-        self.__sessionId=self.__sObj.getId()
-        self.__sessionPath=self.__sObj.getPath()
-        self.__rltvSessionPath=self.__sObj.getRelativePath()
-        if (self.__verbose):
-            self.__lfh.write("------------------------------------------------------\n")                    
-            self.__lfh.write("+AtomMatch.__getSession() - creating/joining session %s\n" % self.__sessionId)
-            self.__lfh.write("+AtomMatch.__getSession() - session path %s\n" % self.__sessionPath)            
+        self.__inputFilePath = os.path.join(self._sessionPath, "in.cif")
+        self.__matchResultPath = os.path.join(self._sessionPath, "match_result")
 
     def GetResult(self):
-        self.__getInputCifData()
+        self._getInputCifData(self.__inputFilePath)
         self.__runAtomMatchScript()
         return self.__returnData()
 
-    def __getInputCifData(self):
-        cif = self.__reqObj.getValue('cif')
-        filePath = os.path.join(self.__sessionPath,'in.cif')
-        f = open(filePath, 'w')
-        f.write(cif + '\n')
-        f.close()
-
     def __runAtomMatchScript(self):
-        filePath = os.path.join(self.__sessionPath, 'in.cif')
-        if not os.access(filePath, os.R_OK):
+        if not os.access(self.__inputFilePath, os.R_OK):
             return
         #
-        reverse_flag = self.__reqObj.getValue('reverse')
-        id =  str(self.__reqObj.getValue('id'))
-        if not id:
+        ccFilePath = self._getCcFilePathWithWebRequstId()
+        if not ccFilePath:
             return
         #
-        self.__reqObj.setValue("sessionid", self.__sessionId)
-        cvsUtil = CVSBase(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
-        filePath = cvsUtil.getSandBoxFilePath(id)
-        if not os.access(filePath, os.F_OK):
-            return
+        reverse_flag = self._reqObj.getValue("reverse")
+        self._removeFile(self.__matchResultPath)
         #
-        script = os.path.join(self.__sessionPath, 'match.csh')
-        f = open(script, 'w')
-        f.write('#!/bin/tcsh -f\n')
-        f.write('#\n')
-        f.write('setenv RCSBROOT   ' + self.__cI.get('SITE_ANNOT_TOOLS_PATH') + '\n')
-        f.write('setenv BINPATH ${RCSBROOT}/bin\n')
-        f.write('#\n')
+        cmd = "cd " + self._sessionPath + " ; " + self._annotBashSetting();
         if reverse_flag == 'yes':
-            f.write('${BINPATH}/GetAtomMatch -first in.cif -second ' + filePath)
+            cmd += " ${BINPATH}/GetAtomMatch -first in.cif -second " + ccFilePath
         else:
-            f.write('${BINPATH}/GetAtomMatch -first ' + filePath + ' -second in.cif')
-        f.write(' -output match_result -log logfile >& _match_log\n')
-        f.write('#\n')
-        f.close()
-        cmd = 'cd ' + self.__sessionPath + '; chmod 755 match.csh; ./match.csh >& match_log'
-        os.system(cmd)
+            cmd += " ${BINPATH}/GetAtomMatch -first " + ccFilePath + " -second in.cif"
         #
+        cmd += " -output match_result -log logfile > _match_log 2>&1 ; "
+        self._runCmd(cmd)
 
     def __returnData(self):
-        filePath = os.path.join(self.__sessionPath, 'match_result')
-        if not os.access(filePath, os.R_OK):
-            return ''
+        if not os.access(self.__matchResultPath, os.R_OK):
+            return ""
         #
-        f = open(filePath, 'r')
+        f = open(self.__matchResultPath, "r")
         data = f.read()
         f.close()
         #

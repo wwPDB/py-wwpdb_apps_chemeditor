@@ -23,7 +23,7 @@ except ImportError:
     from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
 
     from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
-    from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSBase, CVSCommit
+    from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSCommit
     from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
     from wwpdb.apps.chemeditor.webapp.Get2D import Get2D
     from wwpdb.apps.chemeditor.webapp.GetLigand import GetLigand

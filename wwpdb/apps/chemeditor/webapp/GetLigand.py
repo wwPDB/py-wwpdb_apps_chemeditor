@@ -22,42 +22,54 @@ __version__   = "V0.07"
 
 import os, sys, string, traceback
 
-from wwpdb.utils.config.ConfigInfo  import ConfigInfo
-from wwpdb.apps.chemeditor.webapp.CVSCommit  import CVSBase
+from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 
-#
-
-class GetLigand(object):
+class GetLigand(ChemEditorBase):
     """ 
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__reqObj=reqObj
-        self.__siteId  = str(self.__reqObj.getValue('WWPDB_SITE_ID'))
-        self.__cI=ConfigInfo(self.__siteId)
+        super(GetLigand, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
         #
+        self.__ccFilePath = self._getCcFilePathWithWebRequstId()
+        self.__cifObj = None
 
-    def GetResult(self):
-        if (self.__verbose):
-            self.__lfh.write("+GetLigand.GetResult() - starting\n")
+    def GetCifData(self):
+        """
+        """
+        if not self.__ccFilePath:
+            return ""
         #
-        id =  str(self.__reqObj.getValue('id'))
-        if not id:
-            return ''
-        #
-        cvsUtil = CVSBase(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
-        filePath = cvsUtil.getSandBoxFilePath(id)
-        if not os.access(filePath, os.F_OK):
-            if (self.__verbose):
-                self.__lfh.write("+GetLigand.GetResult() - Not found %s\n" % filePath)
-            return ''
-        #
-        if (self.__verbose):
-            self.__lfh.write("+GetLigand.GetResult() - found %s\n" % filePath)
-        f = open(filePath, 'r')
-        data = f.read()
-        f.close()
-        #if (self.__verbose):
-        #    self.__lfh.write("+GetLigand.GetResult() - data %s\n" % data)
+        ifh = open(self.__ccFilePath, "r")
+        data = ifh.read()
+        ifh.close()
         return data
+
+    def GetReleaseStatus(self):
+        """
+        """
+        self.__getCifObj()
+        if not self.__cifObj:
+            return ""
+        #
+        return self.__cifObj.GetSingleValue("chem_comp", "pdbx_release_status")
+
+    def GetOneLetterCode(self):
+        """
+        """
+        self.__getCifObj()
+        if not self.__cifObj:
+            return ""
+        #
+        return self.__cifObj.GetSingleValue("chem_comp", "one_letter_code")
+
+    def __getCifObj(self):
+        """
+        """
+        if self.__cifObj:
+            return
+        #
+        if not self.__ccFilePath:
+            return
+        #
+        self.__cifObj = mmCIFUtil(filePath=self.__ccFilePath)

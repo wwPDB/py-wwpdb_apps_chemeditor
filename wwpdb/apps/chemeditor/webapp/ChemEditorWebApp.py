@@ -26,13 +26,13 @@ import sys
 import traceback
 import types
 
-from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
 
 from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
-from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSBase, CVSCommit
 from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
+from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
+from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSCommit
 from wwpdb.apps.chemeditor.webapp.Get2D import Get2D
 from wwpdb.apps.chemeditor.webapp.GetLigand import GetLigand
 from wwpdb.apps.chemeditor.webapp.SaveLigand import SaveLigand
@@ -160,7 +160,8 @@ class ChemEditorWebAppWorker(object):
                          '/service/chemeditor/atom_match':        '_atomMatch',
                          '/service/chemeditor/echo_file':         '_echoFileDownLoad',
                          '/service/chemeditor/get_new_code':      '_getNewCode',
-                         '/service/chemeditor/status_code':       '_statusCode',
+                         '/service/chemeditor/status_code':       '_getStatusCode',
+                         '/service/chemeditor/one_letter_code':   '_getOneLetterCode',
                          '/service/chemeditor/update':            '_updateLigand',
                          '/service/chemeditor/save_component':    '_saveComponent',
                          '/service/chemeditor/cvs_commit':        '_CVSCommit'
@@ -184,7 +185,7 @@ class ChemEditorWebAppWorker(object):
         """
         #
         reqPath=self.__reqObj.getRequestPath()
-        if not self.__appPathD.has_key(reqPath):
+        if not reqPath in self.__appPathD:
             # bail out if operation is unknown -
             rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
             rC.setError(errMsg='Unknown operation')
@@ -204,7 +205,7 @@ class ChemEditorWebAppWorker(object):
         #
         try:
             reqPath=self.__reqObj.getRequestPath()
-            if not self.__appPathD.has_key(reqPath):
+            if not reqPath in self.__appPathD:
                 # bail out if operation is unknown -
                 rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
                 rC.setError(errMsg='Unknown operation')
@@ -270,7 +271,7 @@ class ChemEditorWebAppWorker(object):
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         classObj = GetLigand(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
-        textcontent = classObj.GetResult()
+        textcontent = classObj.GetCifData()
         if not textcontent:
             rC.setError(errMsg='failed')
         else:
@@ -361,7 +362,7 @@ class ChemEditorWebAppWorker(object):
     def __getNewCodeFromList(self):
         """ Get unused Ligand Code from pre-defined list
         """
-        cvsUtil = CVSBase(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        cvsUtil = ChemEditorBase(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         code = ''
         filePath = os.path.join(self.__cI.get('SITE_DEPLOY_PATH'), 'reference', 'id_codes', 'unusedCodes.lst')
         self.__lfh.write("+ChemEditorWebAppWorker.__getNewCodeFromList filePath=%s\n" % filePath)
@@ -372,13 +373,14 @@ class ChemEditorWebAppWorker(object):
         cCH = ChemCompHash()
         idlist = data.split('\n')
         idx = 0
-        for id in idlist:
+        for ccId in idlist:
             idx += 1
-            if cCH.getChemCompIdSite(id) != self.__cI.get('SITE_NAME').upper():
+            if cCH.getChemCompIdSite(ccId) != self.__cI.get('SITE_NAME').upper():
                 continue
-            component = cvsUtil.getSandBoxFilePath(id)
-            if not os.access(component, os.F_OK):
-                code = id
+            #
+            component = cvsUtil.getSandBoxFilePath(ccId)
+            if not component:
+                code = ccId
                 break
             #
         #
@@ -388,21 +390,14 @@ class ChemEditorWebAppWorker(object):
         f.close()
         return code
 
-    def _statusCode(self):
+    def _getStatusCode(self):
         """ Check status code for existing chemical component
         """
         if (self.__verbose):
-            self.__lfh.write("+ChemEditorWebAppWorker._statusCode() Starting now\n")
+            self.__lfh.write("+ChemEditorWebAppWorker._getStatusCode() Starting now\n")
         #
-        status = ''
-        id =  str(self.__reqObj.getValue('id'))
-        if id:
-            cvsUtil = CVSBase(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
-            filePath = cvsUtil.getSandBoxFilePath(id)
-            if os.access(filePath, os.F_OK):
-                cifObj = mmCIFUtil(filePath=filePath)
-                status = cifObj.GetSingleValue('chem_comp', 'pdbx_release_status')
-            #
+        classObj = GetLigand(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        status = classObj.GetReleaseStatus()
         #
         self.__reqObj.setReturnFormat(return_format="json")
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
@@ -411,6 +406,25 @@ class ChemEditorWebAppWorker(object):
             rC.setError(errMsg='failed')
         else:
             rC.setText(text=status)
+        #
+        return rC
+
+    def _getOneLetterCode(self):
+        """ Get one letter code for existing chemical component
+        """
+        if (self.__verbose):
+            self.__lfh.write("+ChemEditorWebAppWorker._getOneLetterCode() Starting now\n")
+        #
+        classObj = GetLigand(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        oneletter = classObj.GetOneLetterCode()
+        #
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        #
+        if not oneletter:
+            rC.setError(errMsg='failed')
+        else:
+            rC.setText(text=oneletter)
         #
         return rC
 
