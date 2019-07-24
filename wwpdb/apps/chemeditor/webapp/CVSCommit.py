@@ -336,11 +336,12 @@ class CVSCommit(ChemEditorBase):
         targetFile = self.getSandBoxFilePath(ccId)
         textList = []
         try:
-            if os.access(targetFile, os.F_OK):
+            if targetFile and os.access(targetFile, os.F_OK):
                 self._cvsAdmin.checkOut(os.path.join(self._ccProjectName, ccId[0], ccId, ccId + ".cif"))
                 shutil.copy2(sourceFilePath, targetFile)
             else:
                 dstPath = os.path.join(self._ccPath, ccId[0], ccId)
+                targetFile = os.path.join(dstPath, ccId + ".cif")
                 if (not os.access(dstPath, os.F_OK)):
                     os.makedirs(dstPath)
                     ok, text = self._cvsAdmin.add(self._ccProjectName, os.path.join(ccId[0], ccId))

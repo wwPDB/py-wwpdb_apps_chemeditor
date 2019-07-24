@@ -92,7 +92,7 @@ class Search(ChemEditorBase):
 
     def __isValidId(self, ccId):
         filePath = self.getSandBoxFilePath(ccId) 
-        if not os.access(filePath, os.F_OK):
+        if (not filePath) or (not os.access(filePath, os.F_OK)):
             return False
         #
         cifObj = mmCIFUtil(filePath=filePath)

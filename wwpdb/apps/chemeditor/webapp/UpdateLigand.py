@@ -122,7 +122,7 @@ class UpdateLigand(ChemEditorBase):
 
     def __get_synonyms(self, ccId):
         filePath = self.getSandBoxFilePath(ccId)
-        if not os.access(filePath, os.F_OK):
+        if (not filePath) or (not os.access(filePath, os.F_OK)):
             return ""
         #
         cifObj = mmCIFUtil(filePath=filePath)
