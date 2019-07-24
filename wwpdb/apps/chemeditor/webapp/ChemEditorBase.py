@@ -102,7 +102,7 @@ class ChemEditorBase(object):
         """
         dictInfo = self._cI.get("SITE_PDBX_DICTIONARY_NAME_DICT")
         setting = " PDBX_DICT_PATH=" + self._cI.get("SITE_PDBX_DICT_PATH") + "; export PDBX_DICT_PATH; " \
-                + " DICT_NAME=" + dictInfo["ARCHIVE_NEXT"] + "; DICT_NAME; " \
+                + " DICT_NAME=" + dictInfo["ARCHIVE_NEXT"] + "; export DICT_NAME; " \
                 + " DICT_CIF_FILE=${PDBX_DICT_PATH}/${DICT_NAME}.dic; export DICT_CIF_FILE; " \
                 + " DICT_SDB_FILE=${PDBX_DICT_PATH}/${DICT_NAME}.sdb; export DICT_SDB_FILE; " \
                 + " DICT_ODB_FILE=${PDBX_DICT_PATH}/${DICT_NAME}.odb; export DICT_ODB_FILE; "
