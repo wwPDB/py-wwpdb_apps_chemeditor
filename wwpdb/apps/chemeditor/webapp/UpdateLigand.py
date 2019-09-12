@@ -88,8 +88,14 @@ class UpdateLigand(ChemEditorBase):
         #
         myBlock = myDataList[0]
         compCat = myBlock.getObj("chem_comp")
-        compCat.setValue("NON-POLYMER", "type", 0)
-        compCat.setValue("HETAIN", "pdbx_type", 0)
+        ccType = compCat.getValue("type", 0)
+        if (ccType == "?") or (ccType == "."):
+            compCat.setValue("NON-POLYMER", "type", 0)
+        #
+        pdbxType = compCat.getValue("pdbx_type", 0)
+        if (pdbxType == "?") or (pdbxType == "."):
+            compCat.setValue("HETAIN", "pdbx_type", 0)
+        #
         ccId = compCat.getValue("id", 0)
         compCat.setValue(ccId, "three_letter_code", 0)
         synonyms = self.__get_synonyms(ccId)
@@ -97,23 +103,27 @@ class UpdateLigand(ChemEditorBase):
             compCat.setValue(synonyms, "pdbx_synonyms", 0)
         #
         if self.__pdbId:
-            compCat.setValue(self.__pdbId, "pdbx_model_coordinates_db_code", 0)
+            pdbId = compCat.getValue("pdbx_model_coordinates_db_code", 0)
+            if (pdbId == "?") or (pdbId == "."):
+                compCat.setValue(self.__pdbId, "pdbx_model_coordinates_db_code", 0)
+            #
         #
         if self.__processing_site:
             site = compCat.getValue("pdbx_processing_site", 0)
-            if site == "?" or site == "." or site == "ChemCompOB":
+            if (site == "?") or (site == ".") or (site == "ChemCompOB"):
                 compCat.setValue(self.__processing_site, "pdbx_processing_site", 0)
             #
             auditCat = myBlock.getObj("pdbx_chem_comp_audit")
             site = auditCat.getValue("processing_site", 0)
-            if site == "?" or site == "." or site == "ChemCompOB":
+            if (site == "?") or (site == ".") or (site == "ChemCompOB"):
                 auditCat.setValue(self.__processing_site, "processing_site", 0)
             #
         #
         if self.__annotator:
             anno = auditCat.getValue("annotator", 0)
-            if anno == "?" or anno == ".":
+            if (anno == "?") or (anno == "."):
                 auditCat.setValue(self.__annotator, "annotator", 0)
+            #
         #
         ofh = open(filePath, "w")
         pdbxW = PdbxWriter(ofh)

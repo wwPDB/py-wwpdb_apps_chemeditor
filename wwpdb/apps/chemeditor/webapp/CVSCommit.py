@@ -21,6 +21,7 @@ __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
 import os,shutil,sys,traceback
+from datetime import datetime
 
 from mmcif.api.DataCategory import DataCategory
 from mmcif.io.PdbxReader import PdbxReader
@@ -95,6 +96,7 @@ class CVSCommit(ChemEditorBase):
         self.__id = str(self._reqObj.getValue("id"))
         self.__cif = self._reqObj.getValue("cif")
         self.__flag = self._reqObj.getValue("force")
+        self.__existingFlag = self._reqObj.getValue("existflag")
         #
         if not self.__id:
             return
@@ -251,6 +253,7 @@ class CVSCommit(ChemEditorBase):
         myD = {}
         myD["id"] = self.__id
         myD["sessionid"] = self._sessionId
+        myD["existflag"] = self.__existingFlag
         myD["error"] = error_msg
         #
         filePath = os.path.join(self._sessionPath, "error2.html")
@@ -277,6 +280,9 @@ class CVSCommit(ChemEditorBase):
     def __updateExistingValues(self, existingFile):
         """
         """
+        if self.__existingFlag == "yes":
+            return
+        #
         cifObj = mmCIFUtil(filePath=existingFile)
         #
         myDataList=[]
@@ -296,13 +302,28 @@ class CVSCommit(ChemEditorBase):
         existing_audits = cifObj.GetValue("pdbx_chem_comp_audit")
         if existing_audits:
             items = [ "comp_id", "action_type", "date", "processing_site", "annotator", "details" ]
-            auditCat = myBlock.getObj("pdbx_chem_comp_audit")
             newAuditCat = DataCategory("pdbx_chem_comp_audit")
             for item in items:
                 newAuditCat.appendAttribute(item)
             #
+            uniqueList = []
             row = 0
             for auditDict in existing_audits:
+                uniqueValue = ""
+                for item in items:
+                    if item not in auditDict:
+                        continue
+                    #
+                    if uniqueValue:
+                        uniqueValue += "|"
+                    #
+                    uniqueValue += auditDict[item]
+                #
+                if uniqueValue in uniqueList:
+                    continue
+                #
+                uniqueList.append(uniqueValue)
+                #
                 for item in items:
                     if item in auditDict:
                         newAuditCat.setValue(auditDict[item], item, row)
@@ -310,14 +331,47 @@ class CVSCommit(ChemEditorBase):
                 #
                 row += 1
             #
-            for item in items:
-                try:
-                    val = auditCat.getValue(item, 0)
-                    if val and val != "?" and val != ".":
-                        newAuditCat.setValue(val, item, row)
+            auditCat = myBlock.getObj("pdbx_chem_comp_audit")
+            if auditCat:
+                today = datetime.today().strftime("%Y-%m-%d")
+                iList = auditCat.getAttributeList()
+                for rowDic in auditCat.getRowList():
+                    auditDict = {}
+                    for idxIt, itName in enumerate(iList):
+                        if rowDic[idxIt] != '?' and rowDic[idxIt] != '.':
+                            auditDict[itName] = rowDic[idxIt]
+                        #
                     #
-                except:
-                    pass
+                    if not auditDict:
+                        continue
+                    #
+                    if ("date" not in auditDict) or (auditDict["date"] != today):
+                        continue
+                    #
+                    if ("action_type" not in auditDict) or (auditDict["action_type"] == "Create component"):
+                        continue
+                    #
+                    uniqueValue = ""
+                    for item in items:
+                        if item not in auditDict:
+                            continue
+                        #
+                        if uniqueValue:
+                            uniqueValue += "|"
+                        #
+                        uniqueValue += auditDict[item]
+                    #
+                    if uniqueValue in uniqueList:
+                        continue
+                    #
+                    uniqueList.append(uniqueValue)
+                    #
+                    for item in items:
+                        if item in auditDict:
+                            newAuditCat.setValue(auditDict[item], item, row)
+                        #
+                    #
+                    row += 1
                 #
             #
             myBlock.replace(newAuditCat)
