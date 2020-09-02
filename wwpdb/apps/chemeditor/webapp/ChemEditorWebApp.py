@@ -33,6 +33,7 @@ from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
 from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSCommit
+from wwpdb.apps.chemeditor.webapp.Enumeration import Enumeration
 from wwpdb.apps.chemeditor.webapp.Get2D import Get2D
 from wwpdb.apps.chemeditor.webapp.GetLigand import GetLigand
 from wwpdb.apps.chemeditor.webapp.SaveLigand import SaveLigand
@@ -164,7 +165,8 @@ class ChemEditorWebAppWorker(object):
                          '/service/chemeditor/one_letter_code':   '_getOneLetterCode',
                          '/service/chemeditor/update':            '_updateLigand',
                          '/service/chemeditor/save_component':    '_saveComponent',
-                         '/service/chemeditor/cvs_commit':        '_CVSCommit'
+                         '/service/chemeditor/cvs_commit':        '_CVSCommit',
+                         '/service/chemeditor/get_enumeration':   '_getEnumeration'
                          }
         
     def doOp(self):
@@ -475,6 +477,22 @@ class ChemEditorWebAppWorker(object):
         #
         cvsObj = CVSCommit(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         myD = cvsObj.commit()
+        if myD:
+            rC.addDictionaryItems(myD)
+        #
+        return rC
+
+    def _getEnumeration(self):
+        """ CVS commit to chemical component dictionary
+        """
+        if (self.__verbose):
+            self.__lfh.write("+ChemEditorWebAppWorker._getEnumeration() Starting now\n")
+        #
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        #
+        enumObj = Enumeration(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        myD = enumObj.get()
         if myD:
             rC.addDictionaryItems(myD)
         #
