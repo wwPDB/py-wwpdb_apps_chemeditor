@@ -116,6 +116,9 @@ class CVSCommit(ChemEditorBase):
         """ Save chemical component cif file
         """
         if self.__flag:
+            if (not self.__sourceFile) or (not os.access(self.__sourceFile, os.R_OK)):
+                return "CVS commit failed"
+            #
             return ""
         #
         if (not self.__sourceFile) or (not self.__cif):
@@ -126,6 +129,7 @@ class CVSCommit(ChemEditorBase):
         f.close()
         if not os.access(self.__sourceFile, os.R_OK):
             return "CVS commit failed"
+        #
         return ""
 
     def __checkSynTaxError(self):
@@ -143,6 +147,9 @@ class CVSCommit(ChemEditorBase):
             f = open(logFilePath, "r")
             data = f.read()
             f.close()
+            if (not data) or (not data.startswith("Syntax error:")):
+                data += self.__checkParentCompId_and_updateSynonyms(not data)
+            #
             if data:
                 message = "yes"
                 filePath = os.path.join(self._sessionPath, "error1.html")
@@ -227,6 +234,21 @@ class CVSCommit(ChemEditorBase):
         #
         return ""
 
+    def __commitCVS(self):
+        """ Run CVS check-in
+        """
+        if (not self.__sourceFile) or (not os.access(self.__sourceFile, os.R_OK)):
+            return "CVS commit failed"
+        #
+        targetFile = os.path.join(self.__targetPath, self.__id + ".cif")
+        if os.access(self.__targetPath, os.F_OK):
+            if not os.access(targetFile, os.R_OK):
+                return self.__targetPath + " exists. But " + targetFile + " does not exist. CVS commit failed."
+            #
+            self.__updateExistingValues(targetFile)
+        #
+        return self.__cvsCommit(self.__id, self.__sourceFile)
+
     def __writeError2(self, error1, error2):
         """ Write error message html page
         """
@@ -264,20 +286,46 @@ class CVSCommit(ChemEditorBase):
         f.close()
         return "yes"
 
-    def __commitCVS(self):
-        """ Run CVS check-in
+    def __checkParentCompId_and_updateSynonyms(self, noErrorFlag):
         """
-        if not os.access(self.__sourceFile, os.R_OK):
-            return "CVS commit failed"
+        """
+        cifObj = mmCIFUtil(filePath=self.__sourceFile)
         #
-        targetFile = os.path.join(self.__targetPath, self.__id + ".cif")
-        if os.access(self.__targetPath, os.F_OK):
-            if not os.access(targetFile, os.R_OK):
-                return self.__targetPath + " exists. But " + targetFile + " does not exist. CVS commit failed."
+        synonyms = ""
+        synonymList = cifObj.GetValue("pdbx_chem_comp_synonyms")
+        if synonymList:
+            uniqueList = []
+            for dic in synonymList:
+                if ("name" not in dic) or (not dic["name"]) or (dic["name"] in uniqueList):
+                    continue
+                #
+                uniqueList.append(dic["name"])
+                if synonyms:
+                    synonyms += "; "
+                #
+                synonyms += dic["name"]
             #
-            self.__updateExistingValues(targetFile)
         #
-        return self.__cvsCommit(self.__id, self.__sourceFile)
+        errorMessage = ""
+        parent_comp_ids = cifObj.GetSingleValue("chem_comp", "mon_nstd_parent_comp_id")
+        if parent_comp_ids:
+            comp_ids = parent_comp_ids.replace("\n\r", " ").replace("\n", " ").replace("\r", " ").replace(";", " ").replace(",", " ")
+            for comp_id in comp_ids.split(" "):
+                if not comp_id:
+                    continue
+                #
+                targetFile = os.path.join(self._ccPath, comp_id[0], comp_id, comp_id + ".cif")
+                if (not targetFile) or (not os.access(targetFile, os.F_OK)):
+                    errorMessage = "Incorrect parent compId: '" + parent_comp_ids + "'.\n\n"
+                    break
+                #
+            #
+        #
+        if noErrorFlag and synonyms and (not errorMessage):
+            cifObj.UpdateSingleRowValue("chem_comp", "pdbx_synonyms", 0, synonyms)
+            cifObj.WriteCif(outputFilePath=self.__sourceFile)
+        #
+        return errorMessage
 
     def __updateExistingValues(self, existingFile):
         """
