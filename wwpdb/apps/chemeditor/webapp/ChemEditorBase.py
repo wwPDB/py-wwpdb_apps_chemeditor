@@ -25,6 +25,7 @@ import sys
 
 from wwpdb.io.cvs.CvsAdmin import CvsSandBoxAdmin
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 
 
 class ChemEditorBase(object):
@@ -41,6 +42,7 @@ class ChemEditorBase(object):
         self._rltvSessionPath = None
         self.__siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
         self._cI = ConfigInfo(self.__siteId)
+        self._cICommon = ConfigInfoAppCommon(self.__siteId)
         self.__sbTopPath = self._cI.get("SITE_REFDATA_TOP_CVS_SB_PATH")  # "/wwpdb_da/da_top/reference/components"
         self._ccProjectName = self._cI.get("SITE_REFDATA_PROJ_NAME_CC")  # "ligand-dict-v3"
         self._ccPath = os.path.join(self.__sbTopPath, self._ccProjectName)
@@ -103,9 +105,8 @@ class ChemEditorBase(object):
     def _mmcifDictBashSetting(self):
         """
         """
-        dictInfo = self._cI.get("SITE_PDBX_DICTIONARY_NAME_DICT")
-        setting = " PDBX_DICT_PATH=" + self._cI.get("SITE_PDBX_DICT_PATH") + "; export PDBX_DICT_PATH; " \
-                  + " DICT_NAME=" + dictInfo["ARCHIVE_NEXT"] + "; export DICT_NAME; " \
+        setting = " PDBX_DICT_PATH=" + self._cICommon.get_mmcif_dict_path() + "; export PDBX_DICT_PATH; " \
+                  + " DICT_NAME=" + self._cICommon.get_mmcif_archive_next_dict_filename() + "; export DICT_NAME; " \
                   + " DICT_CIF_FILE=${PDBX_DICT_PATH}/${DICT_NAME}.dic; export DICT_CIF_FILE; " \
                   + " DICT_SDB_FILE=${PDBX_DICT_PATH}/${DICT_NAME}.sdb; export DICT_SDB_FILE; " \
                   + " DICT_ODB_FILE=${PDBX_DICT_PATH}/${DICT_NAME}.odb; export DICT_ODB_FILE; "
