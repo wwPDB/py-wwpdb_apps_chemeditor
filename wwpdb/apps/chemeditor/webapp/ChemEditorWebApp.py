@@ -30,7 +30,7 @@ from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
 
 from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
-from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
+#from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSCommit
 from wwpdb.apps.chemeditor.webapp.Enumeration import Enumeration
@@ -372,14 +372,14 @@ class ChemEditorWebAppWorker(object):
         data = f.read()
         f.close()
         #
-        cCH = ChemCompHash()
+#       cCH = ChemCompHash()
         idlist = data.split('\n')
         idx = 0
         for ccId in idlist:
             idx += 1
-            if cCH.getChemCompIdSite(ccId) != self.__cI.get('SITE_NAME').upper():
-                continue
-            #
+#           if cCH.getChemCompIdSite(ccId) != self.__cI.get('SITE_NAME').upper():
+#               continue
+#           #
             component = cvsUtil.getSandBoxFilePath(ccId)
             if not component:
                 code = ccId
