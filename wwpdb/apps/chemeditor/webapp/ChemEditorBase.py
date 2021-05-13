@@ -89,8 +89,8 @@ class ChemEditorBase(object):
         """
         """
         setting = " CC_TOOLS=" + os.path.join(self._cI.get("SITE_CC_APPS_PATH"), "bin") + "; export CC_TOOLS; " \
-                  + " OE_DIR=" + self._cI.get("SITE_CC_OE_DIR") + "; export OE_DIR; " \
-                  + " OE_LICENSE=" + self._cI.get("SITE_CC_OE_LICENSE") + "; export OE_LICENSE; " \
+                  + " OE_DIR=" + self._cICommon.get_site_cc_oe_dir() + "; export OE_DIR; " \
+                  + " OE_LICENSE=" + self._cICommon.get_site_cc_oe_licence() + "; export OE_LICENSE; " \
                   + " ACD_DIR=" + self._cI.get("SITE_CC_ACD_DIR") + "; export ACD_DIR; " \
                   + " CACTVS_DIR=" + self._cI.get("SITE_CC_CACTVS_DIR") + "; export CACTVS_DIR; " \
                   + " CORINA_DIR=" + os.path.join(self._cI.get("SITE_CC_CORINA_DIR"), "bin") + "; export CORINA_DIR; " \
