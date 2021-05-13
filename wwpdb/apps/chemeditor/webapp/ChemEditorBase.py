@@ -43,9 +43,9 @@ class ChemEditorBase(object):
         self.__siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
         self._cI = ConfigInfo(self.__siteId)
         self._cICommon = ConfigInfoAppCommon(self.__siteId)
-        self.__sbTopPath = self._cI.get("SITE_REFDATA_TOP_CVS_SB_PATH")  # "/wwpdb_da/da_top/reference/components"
+        self.__sbTopPath = self._cICommon.get_site_refdata_top_cvs_sb_path()  # "/wwpdb_da/da_top/reference/components"
         self._ccProjectName = self._cI.get("SITE_REFDATA_PROJ_NAME_CC")  # "ligand-dict-v3"
-        self._ccPath = os.path.join(self.__sbTopPath, self._ccProjectName)
+        self._ccPath = self._cICommon.get_site_cc_cvs_path()
         #
         self.__getSession()
         #
@@ -81,7 +81,7 @@ class ChemEditorBase(object):
         """
         """
         setting = " RCSBROOT=" + self._cI.get("SITE_ANNOT_TOOLS_PATH") + "; export RCSBROOT; " \
-                  + " COMP_PATH=" + self._cI.get("SITE_CC_CVS_PATH") + "; export COMP_PATH; " \
+                  + " COMP_PATH=" + self._cICommon.get_site_cc_cvs_path() + "; export COMP_PATH; " \
                   + " BINPATH=${RCSBROOT}/bin; export BINPATH; "
         return setting
 
@@ -115,9 +115,12 @@ class ChemEditorBase(object):
     def _ccDictBashSetting(self):
         """
         """
-        setting = " CC_DICT=" + self._cI.get("SITE_CC_DICT_PATH") + "; export CC_DICT; " \
-                  + " CC_IDX_FILE=${CC_DICT}/Components-all-v3-r4.idx; export CC_IDX_FILE; " \
-                  + " CC_SDB_FILE=${CC_DICT}/Components-all-v3.sdb; export CC_SDB_FILE; "
+        setting = " CC_DICT={}; export CC_DICT; " \
+                  + " CC_IDX_FILE={}; export CC_IDX_FILE; " \
+                  + " CC_SDB_FILE={}; export CC_SDB_FILE; ".format(self._cICommon.get_site_cc_dict_path(),
+                                                                   self._cICommon.get_cc_dict_idx(),
+                                                                   self._cICommon.get_cc_dict_serial()
+                                                                   )
         return setting
 
     def _runCmd(self, cmd):
@@ -197,9 +200,11 @@ class ChemEditorBase(object):
         """
         cvsRepositoryHost = self._cI.get("SITE_REFDATA_CVS_HOST")
         cvsRepositoryPath = self._cI.get("SITE_REFDATA_CVS_PATH")
+        cvsUsername = self._cI.get('SITE_REFDATA_CVS_USER')
+        cvsPassword = self._cI.get('SITE_REFDATA_CVS_PASSWORD')
         cvs = CvsSandBoxAdmin(tmpPath=self._sessionPath, verbose=self._verbose, log=self._lfh)
         cvs.setRepositoryPath(host=cvsRepositoryHost, path=cvsRepositoryPath)
-        cvs.setAuthInfo(user="liganon3", password="lig1234")
+        cvs.setAuthInfo(user=cvsUsername, password=cvsPassword)
         cvs.setSandBoxTopPath(self.__sbTopPath)
         return cvs
 
