@@ -78,7 +78,7 @@ class SaveLigand(ChemEditorBase):
         if self.__genimageflag != "yes":
             return
         #
-        self._reqObj.setValue("SessionsPath", self._cI.get("SITE_WEB_APPS_SESSIONS_PATH"))
+        self._reqObj.setValue("SessionsPath", self._cICommon.get_site_web_apps_sessions_path())
         ccAssignDataStore = ChemCompAssignDataStore(self._reqObj, verbose=self._verbose, log=self._lfh)
         mtchL = ccAssignDataStore.getTopHitsList(instanceId)
         HitList = []
