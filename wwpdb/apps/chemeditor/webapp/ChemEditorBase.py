@@ -80,7 +80,7 @@ class ChemEditorBase(object):
     def _annotBashSetting(self):
         """
         """
-        setting = " RCSBROOT=" + self._cI.get("SITE_ANNOT_TOOLS_PATH") + "; export RCSBROOT; " \
+        setting = " RCSBROOT=" + self._cICommon.get_site_annot_tools_path() + "; export RCSBROOT; " \
                   + " COMP_PATH=" + self._cICommon.get_site_cc_cvs_path() + "; export COMP_PATH; " \
                   + " BINPATH=${RCSBROOT}/bin; export BINPATH; "
         return setting
@@ -88,18 +88,18 @@ class ChemEditorBase(object):
     def _ccToolsBashSetting(self):
         """
         """
-        setting = " CC_TOOLS=" + os.path.join(self._cI.get("SITE_CC_APPS_PATH"), "bin") + "; export CC_TOOLS; " \
+        setting = " CC_TOOLS=" + os.path.join(self._cICommon.get_site_cc_apps_path(), "bin") + "; export CC_TOOLS; " \
                   + " OE_DIR=" + self._cICommon.get_site_cc_oe_dir() + "; export OE_DIR; " \
                   + " OE_LICENSE=" + self._cICommon.get_site_cc_oe_licence() + "; export OE_LICENSE; " \
-                  + " ACD_DIR=" + self._cI.get("SITE_CC_ACD_DIR") + "; export ACD_DIR; " \
-                  + " CACTVS_DIR=" + self._cI.get("SITE_CC_CACTVS_DIR") + "; export CACTVS_DIR; " \
-                  + " CORINA_DIR=" + os.path.join(self._cI.get("SITE_CC_CORINA_DIR"), "bin") + "; export CORINA_DIR; " \
-                  + " BABEL_DIR=" + self._cI.get("SITE_CC_BABEL_DIR") + "; export BABEL_DIR; " \
-                  + " BABEL_DATADIR=" + self._cI.get("SITE_CC_BABEL_DATADIR") + "; export BABEL_DATADIR; " \
-                  + " INCHI_DIR=" + self._cI.get("SITE_CC_INCHI_DIR") + "; export INCHI_DIR; " \
-                  + " LD_LIBRARY_PATH=" + self._cI.get("SITE_CC_BABEL_LIB") + ":" + os.path.join(
-            self._cI.get("SITE_LOCAL_APPS_PATH"), "lib") + ":" \
-                  + self._cI.get("SITE_CC_ACD_DIR") + "; export LD_LIBRARY_PATH; "
+                  + " ACD_DIR=" + self._cICommon.get_site_cc_acd_dir() + "; export ACD_DIR; " \
+                  + " CACTVS_DIR=" + self._cICommon.get_site_cc_cactvs_dir() + "; export CACTVS_DIR; " \
+                  + " CORINA_DIR=" + os.path.join(self._cICommon.get_site_cc_corina_dir(), "bin") + "; export CORINA_DIR; " \
+                  + " BABEL_DIR=" + self._cICommon.get_site_cc_babel_dir() + "; export BABEL_DIR; " \
+                  + " BABEL_DATADIR=" + self._cICommon.get_site_cc_babel_datadir() + "; export BABEL_DATADIR; " \
+                  + " INCHI_DIR=" + self._cICommon.get_site_cc_inchi_dir() + "; export INCHI_DIR; " \
+                  + " LD_LIBRARY_PATH=" + self._cICommon.get_site_cc_babel_lib() + ":" + os.path.join(
+            self._cICommon.get_site_local_apps_path(), "lib") + ":" \
+                  + self._cICommon.get_site_cc_acd_dir() + "; export LD_LIBRARY_PATH; "
         return setting
 
     def _mmcifDictBashSetting(self):

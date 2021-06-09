@@ -23,6 +23,7 @@ __version__   = "V0.07"
 import os, sys
 
 from wwpdb.utils.config.ConfigInfo  import ConfigInfo
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 
 #
 
@@ -39,6 +40,7 @@ class Get2D(object):
         self.__rltvSessionPath=None
         self.__siteId  = str(self.__reqObj.getValue('WWPDB_SITE_ID'))
         self.__cI=ConfigInfo(self.__siteId)
+        self.__cICommon = ConfigInfoAppCommon(self.__siteId)
         #
         self.__getSession()
         #
@@ -94,7 +96,7 @@ class Get2D(object):
         f = open(filePath, 'w')
         f.write('#!/bin/tcsh -f\n')
         f.write('#\n')
-        f.write('setenv CACTVS_ROOT ' + self.__cI.get('SITE_CC_CACTVS_DIR') + '\n')
+        f.write('setenv CACTVS_ROOT ' + self.__cICommon.get_site_cc_cactvs_dir() + '\n')
         f.write('#\n')
         f.write('cat script | ${CACTVS_ROOT}/csts -d $*\n')
         f.close()
