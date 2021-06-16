@@ -21,6 +21,7 @@ __email__     = "zfeng@rcsb.rutgers.edu"
 __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
+from logging import log
 import os
 import sys
 import traceback
@@ -515,7 +516,8 @@ class ChemEditorWebAppWorker(object):
         self.__reqObj.setReturnFormat(return_format="json")
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        with DaInternalCombineDb() as db:
+        
+        with DaInternalCombineDb(siteId=self.__siteId, verbose=True, log=self.__lfh) as db:
             entries = db.getEntriesWithLigand(self.__reqObj.getValue("ccid"))
             rC.setData(entries)
         #
