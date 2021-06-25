@@ -41,6 +41,7 @@ from wwpdb.apps.chemeditor.webapp.SaveLigand import SaveLigand
 from wwpdb.apps.chemeditor.webapp.Search import Search
 from wwpdb.apps.chemeditor.webapp.UpdateLigand import UpdateLigand
 from wwpdb.apps.chemeditor.webapp.Upload import Upload
+from wwpdb.apps.chemeditor.webapp.DaInternalCombineDb import DaInternalCombineDb
 
 
 #
@@ -155,20 +156,21 @@ class ChemEditorWebAppWorker(object):
         self.__cI=ConfigInfo(self.__siteId)
         self.__cICommon = ConfigInfoAppCommon(self.__siteId)
         #
-        self.__appPathD={'/service/environment/dump':             '_dumpOp',
-                         '/service/chemeditor/get_2d':            '_get2D',
-                         '/service/chemeditor/upload':            '_upLoad',
-                         '/service/chemeditor/get_ligand':        '_getLigand',
-                         '/service/chemeditor/search':            '_searchLigand',
-                         '/service/chemeditor/atom_match':        '_atomMatch',
-                         '/service/chemeditor/echo_file':         '_echoFileDownLoad',
-                         '/service/chemeditor/get_new_code':      '_getNewCode',
-                         '/service/chemeditor/status_code':       '_getStatusCode',
-                         '/service/chemeditor/one_letter_code':   '_getOneLetterCode',
-                         '/service/chemeditor/update':            '_updateLigand',
-                         '/service/chemeditor/save_component':    '_saveComponent',
-                         '/service/chemeditor/cvs_commit':        '_CVSCommit',
-                         '/service/chemeditor/get_enumeration':   '_getEnumeration'
+        self.__appPathD={'/service/environment/dump':                   '_dumpOp',
+                         '/service/chemeditor/get_2d':                  '_get2D',
+                         '/service/chemeditor/upload':                  '_upLoad',
+                         '/service/chemeditor/get_ligand':              '_getLigand',
+                         '/service/chemeditor/search':                  '_searchLigand',
+                         '/service/chemeditor/atom_match':              '_atomMatch',
+                         '/service/chemeditor/echo_file':               '_echoFileDownLoad',
+                         '/service/chemeditor/get_new_code':            '_getNewCode',
+                         '/service/chemeditor/status_code':             '_getStatusCode',
+                         '/service/chemeditor/one_letter_code':         '_getOneLetterCode',
+                         '/service/chemeditor/update':                  '_updateLigand',
+                         '/service/chemeditor/save_component':          '_saveComponent',
+                         '/service/chemeditor/cvs_commit':              '_CVSCommit',
+                         '/service/chemeditor/get_enumeration':         '_getEnumeration',
+                         '/service/chemeditor/get_entries_with_ligand': '_getEntriesWithLigands'
                          }
         
     def doOp(self):
@@ -497,6 +499,25 @@ class ChemEditorWebAppWorker(object):
         myD = enumObj.get()
         if myD:
             rC.addDictionaryItems(myD)
+        #
+        return rC
+    
+    def _getEntriesWithLigands(self):
+        """Get depositions containing the requested ligand.
+
+        Returns:
+            ResponseContent: ResponseContent instance wrapping a list
+                of entries
+        """
+        if (self.__verbose):
+            self.__lfh.write("+ChemEditorWebAppWorker._getEntriesWithLigands() Starting now\n")
+        #
+        self.__reqObj.setReturnFormat(return_format="json")
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        #
+        with DaInternalCombineDb() as db:
+            entries = db.getEntriesWithLigand(self.__reqObj.getValue("ccid"))
+            rC.setData(entries)
         #
         return rC
 

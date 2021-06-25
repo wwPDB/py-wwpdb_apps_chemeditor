@@ -7,8 +7,8 @@ class DaInternalCombineDb(object):
     def __init__(self, siteId=None, verbose=False, log=sys.stderr):
         self._mydb = None
         self._siteId = siteId
-        self._open()
         self.logger = setupLog(verbose, log)
+        self._open()
     
     def __enter__(self):
         return self
@@ -56,6 +56,8 @@ class DaInternalCombineDb(object):
         
         self.logger.debug("querying entries with ligand %s", ccId)
 
+        depIds = []
+
         cursor = self._mydb.getCursor()
         cursor.execute(query, (ccId,))
 
@@ -63,12 +65,7 @@ class DaInternalCombineDb(object):
 
         self.logger.info("got %s entries with ligand %s", len(rows), ccId)
 
-        depIds = []
         for r in rows:
             depIds.append(r[0])
 
         return depIds
-
-if __name__ == '__main__':
-    with DaInternalCombineDb() as db:
-        db.getEntriesWithLigand('AAA')
