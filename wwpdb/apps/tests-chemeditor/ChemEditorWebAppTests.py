@@ -48,5 +48,5 @@ class ChemEditorWebAppTests(unittest.TestCase):
         
         mockDb.return_value.__enter__.return_value.getEntriesWithLigand.side_effect = IOError('failed to connect to db')
         self._reqObj.setValue("request_path", "/service/chemeditor/get_entries_with_ligand")
-        # response = json.loads(cewa._getEntriesWithLigands().get()['RETURN_STRING'])
-        # self.assertEqual(response['errortext'], "Unable to get related entries")
+        response = json.loads(cewa.doOp().get()['RETURN_STRING'])
+        self.assertEqual(response['errortext'], "Operation failure")
