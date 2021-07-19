@@ -31,9 +31,8 @@ class DaInternalCombineDb(object):
         ok = self._mydb.openConnection()
 
         if not ok:
-            self.logger.error("Could not open resource connection to DA_INTERNAL_COMBINE")
             self._mydb = None
-            return False
+            raise Exception("Error opening connection to DA_INTERNAL_COMBINE")
 
         return True
 
@@ -57,6 +56,9 @@ class DaInternalCombineDb(object):
         self.logger.debug("querying entries with ligand %s", ccId)
 
         depIds = []
+
+        if self._mydb is None:
+            raise Exception("Error opening connection to database")
 
         cursor = self._mydb.getCursor()
         cursor.execute(query, (ccId,))
