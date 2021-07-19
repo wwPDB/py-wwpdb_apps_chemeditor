@@ -517,9 +517,12 @@ class ChemEditorWebAppWorker(object):
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
         
-        with DaInternalCombineDb(siteId=self.__siteId, verbose=True, log=self.__lfh) as db:
-            entries = db.getEntriesWithLigand(self.__reqObj.getValue("ccid"))
+        try:
+            combine_db = DaInternalCombineDb(siteId=self.__siteId, verbose=True, log=self.__lfh)
+            entries = combine_db.getEntriesWithLigand(self.__reqObj.getValue("ccid"))
             rC.setData(entries)
+        except:
+            rC.setError("Could not open a connection to the database")
         #
         return rC
 
