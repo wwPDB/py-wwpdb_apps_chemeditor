@@ -115,12 +115,9 @@ class ChemEditorBase(object):
     def _ccDictBashSetting(self):
         """
         """
-        setting = " CC_DICT={}; export CC_DICT; " \
-                  + " CC_IDX_FILE={}; export CC_IDX_FILE; " \
-                  + " CC_SDB_FILE={}; export CC_SDB_FILE; ".format(self._cICommon.get_site_cc_dict_path(),
-                                                                   self._cICommon.get_cc_dict_idx(),
-                                                                   self._cICommon.get_cc_dict_serial()
-                                                                   )
+        setting = "CC_DICT={}; export CC_DICT; ".format(self._cICommon.get_site_cc_dict_path())
+        setting += "CC_IDX_FILE={}; export CC_IDX_FILE; ".format(self._cICommon.get_cc_dict_idx())
+        setting += "CC_SDB_FILE={}; export CC_SDB_FILE; ".format(self._cICommon.get_cc_dict_serial())
         return setting
 
     def _runCmd(self, cmd):
