@@ -21,6 +21,7 @@ __license__   = "Creative Commons Attribution 3.0 Unported"
 __version__   = "V0.07"
 
 import os, sys
+from operator import itemgetter
 
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
@@ -30,6 +31,9 @@ class Search(ChemEditorBase):
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         super(Search, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
+        #
+        self.__standardComponents = ( "ALA", "ARG", "ASN", "ASP", "CYS", "GLU", "GLN", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "PHE", \
+                                      "PRO", "SER", "THR", "TRP", "TYR", "VAL", "A", "C", "G", "T", "U", "DA", "DC", "DG", "DT", "DU")
         #
         self.__idMap = {}
         self.__idList = []
@@ -72,22 +76,26 @@ class Search(ChemEditorBase):
             if not line:
                 continue
             #
-            list = line.split("\t")
-            if len(list) != 8:
+            vlist = line.split("\t")
+            if len(vlist) != 8:
                 continue
             #
-            if list[4] in self.__idMap:
+            if vlist[4] in self.__idMap:
                 continue
             #
-            diff = int(list[7]) - int(list[3])
+            diff = int(vlist[7]) - int(vlist[3])
             if diff > 3:
                 continue
             #
-            if not self.__isValidId(list[4]):
+            if not self.__isValidId(vlist[4]):
                 continue
             #
-            self.__idMap[list[4]] = "yes"
-            self.__idList.append(list[4])
+            self.__idMap[vlist[4]] = "yes"
+            standard = 1
+            if vlist[4] in self.__standardComponents:
+                standard = 0
+            #
+            self.__idList.append( (vlist[4], diff, standard) )
         #
 
     def __isValidId(self, ccId):
@@ -105,9 +113,18 @@ class Search(ChemEditorBase):
     def __returnData(self):
         data = ""
         if self.__idList:
-            if len(self.__idList) > 15:
-                data = "\n".join(self.__idList[0:15])
-            else:
-                data = "\n".join(self.__idList)
+            if len(self.__idList) > 1:
+                self.__idList.sort(key=itemgetter(1, 2))
+            #
+            number = len(self.__idList)
+            if number > 15:
+                number = 15
+            #
+            for i in range(0, number):
+                if data:
+                    data += "\n"
+                #
+                data += self.__idList[i][0]
+            #
         #
         return data
