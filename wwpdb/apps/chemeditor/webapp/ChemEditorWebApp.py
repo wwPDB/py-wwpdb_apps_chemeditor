@@ -459,10 +459,12 @@ class ChemEditorWebAppWorker(object):
         if (self.__verbose):
             self.__lfh.write("+ChemEditorWebAppWorker._saveComponent() Starting now\n")
         #
+        isWorkflow = self._isWorkflow()
+
         self.__reqObj.setReturnFormat(return_format="json")
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        classObj = SaveLigand(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        classObj = SaveLigand(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh, isWorkflow=isWorkflow)
         textcontent = classObj.GetResult()
         if not textcontent:
             rC.setError(errMsg='failed')
@@ -525,6 +527,28 @@ class ChemEditorWebAppWorker(object):
             rC.setError("Could not open a connection to the database")
         #
         return rC
+    
+    def _isWorkflow(self):
+        """ Determine if currently operating in Workflow Managed environment
+        
+            :Returns:
+                boolean indicating whether or not currently operating in Workflow Managed environment
+        """
+        #
+        fileSource  = str(self.__reqObj.getValue("filesource")).lower()
+        #
+        if (self.__verbose):
+            self.__lfh.write("+ChemEditorWebAppWorker._isWorkflow() - filesource is %s\n" % fileSource)
+        #
+        # add wf_archive to fix PDBe wfm issue -- jdw 2011-06-30
+        #
+        if fileSource in ['archive','wf-archive','wf_archive','wf-instance','wf_instance']:
+            #if the file source is any of the above then we are in the workflow manager environment
+            return True
+        else:
+            #else we are in the standalone dev environment
+            return False
+
 
 if __name__ == '__main__':
     sTool=ChemEditorWebApp()

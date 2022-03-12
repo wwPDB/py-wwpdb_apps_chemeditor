@@ -288,7 +288,7 @@ class CVSCommit(ChemEditorBase):
         myD["sessionid"] = self._sessionId
         myD["existflag"] = self.__existingFlag
         myD["error"] = error_msg
-        for item in ( "newcodeflag", "instanceid", "parent_sessionid", "filesource", "identifier"):
+        for item in ( "newcodeflag", "instanceid", "parent_sessionid", "filesource", "identifier", "instance" ):
             myD[item] = self._reqObj.getValue(item)
         #
         filePath = os.path.join(self._sessionPath, "error2.html")

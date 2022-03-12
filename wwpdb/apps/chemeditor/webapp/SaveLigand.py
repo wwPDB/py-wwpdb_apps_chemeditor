@@ -24,23 +24,35 @@ import os, shutil, sys
 
 from wwpdb.apps.ccmodule.io.ChemCompAssignDataStore          import ChemCompAssignDataStore
 from wwpdb.apps.ccmodule.reports.ChemCompAlignImageGenerator import ChemCompAlignImageGenerator
-from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
+from wwpdb.apps.chemeditor.webapp.ChemEditorBase             import ChemEditorBase
+from wwpdb.io.locator.PathInfo                               import PathInfo
 
 class SaveLigand(ChemEditorBase):
     """ 
     """
-    def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
+    def __init__(self, reqObj=None, verbose=False, log=sys.stderr, isWorkflow=False):
         super(SaveLigand, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
         self.__instanceId = str(self._reqObj.getValue("instanceid"))
         self.__subpath = str(self._reqObj.getValue("subpath"))
         self.__filextension = str(self._reqObj.getValue("filextension"))
+        self.__depId = str(self._reqObj.getValue("identifier"))
+        self.__wfInstId = str(self._reqObj.getValue("instance"))
+        self.__isWorkflow = isWorkflow
         if not self.__filextension:
             self.__filextension = "cif"
         #
         self.__genimageflag = str(self._reqObj.getValue("genimageflag"))
-        self.__sessionPath = self._sessionPath
-        if self.__subpath:
-            self.__sessionPath = os.path.join(self._sessionPath, self.__subpath)
+
+        if self.__isWorkflow:
+            instancePath = PathInfo().getInstancePath(self.__depId, self.__wfInstId)
+
+            if self.__subpath:
+                self.__sessionPath = os.path.join(instancePath, self.__subpath)
+        else:
+            self.__sessionPath = self._sessionPath
+
+            if self.__subpath:
+                self.__sessionPath = os.path.join(self._sessionPath, self.__subpath)
         #
 
     def GetResult(self):
