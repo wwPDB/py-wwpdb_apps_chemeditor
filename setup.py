@@ -43,7 +43,7 @@ setup(
     ],
     #
     install_requires=['wwpdb.utils.config ~= 0.24', 'wwpdb.io', 'wwpdb.apps.ccmodule >= 0.4',
-                      'wwpdb.utils.session', 'wwpdb.utils.oe_util'],
+                      'wwpdb.utils.db', 'wwpdb.utils.session'],
     packages=find_packages(exclude=['wwpdb.apps.tests-chemeditor',
                                     'mock-data']),
     # Enables Manifest to be used

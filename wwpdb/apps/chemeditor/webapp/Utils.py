@@ -2,6 +2,7 @@ from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO
 
 HANDLER_NAME = 'stream_handler'
 
+
 def setupLog(verbose, log_file):
     """Setup a Logger instance to use the same file as provided
     by the 'log' parameters
@@ -19,7 +20,7 @@ def setupLog(verbose, log_file):
             # this field is not documented
             if h.get_name() == HANDLER_NAME:
                 return logger
-    
+
     handler = StreamHandler(log_file)
     handler.set_name(HANDLER_NAME)
 
@@ -27,7 +28,7 @@ def setupLog(verbose, log_file):
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
-    
+
     if verbose:
         logger.setLevel(DEBUG)
     else:

@@ -29,7 +29,7 @@ from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 
 
 class ChemEditorBase(object):
-    """  Class handle various system and C++ applications setting. 
+    """  Class handle various system and C++ applications setting.
     """
 
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
@@ -52,7 +52,7 @@ class ChemEditorBase(object):
         self._cvsAdmin = self.__setupCvs()
 
     def getSandBoxFilePath(self, ccId):
-        """ Return full sandbox chemical component file path 
+        """ Return full sandbox chemical component file path
         """
         filePath = os.path.join(self._ccPath, ccId[0], ccId, ccId + ".cif")
         self._lfh.write("enter ChemEditorBase.getSandBoxFilePath for ccId=%s filePath=%s\n" % (ccId, filePath))
@@ -88,18 +88,18 @@ class ChemEditorBase(object):
     def _ccToolsBashSetting(self):
         """
         """
-        setting = " CC_TOOLS=" + os.path.join(self._cICommon.get_site_cc_apps_path(), "bin") + "; export CC_TOOLS; " \
-                  + " OE_DIR=" + self._cICommon.get_site_cc_oe_dir() + "; export OE_DIR; " \
-                  + " OE_LICENSE=" + self._cICommon.get_site_cc_oe_licence() + "; export OE_LICENSE; " \
-                  + " ACD_DIR=" + self._cICommon.get_site_cc_acd_dir() + "; export ACD_DIR; " \
-                  + " CACTVS_DIR=" + self._cICommon.get_site_cc_cactvs_dir() + "; export CACTVS_DIR; " \
-                  + " CORINA_DIR=" + os.path.join(self._cICommon.get_site_cc_corina_dir(), "bin") + "; export CORINA_DIR; " \
-                  + " BABEL_DIR=" + self._cICommon.get_site_cc_babel_dir() + "; export BABEL_DIR; " \
-                  + " BABEL_DATADIR=" + self._cICommon.get_site_cc_babel_datadir() + "; export BABEL_DATADIR; " \
-                  + " INCHI_DIR=" + self._cICommon.get_site_cc_inchi_dir() + "; export INCHI_DIR; " \
-                  + " LD_LIBRARY_PATH=" + self._cICommon.get_site_cc_babel_lib() + ":" + os.path.join(
-            self._cICommon.get_site_local_apps_path(), "lib") + ":" \
-                  + self._cICommon.get_site_cc_acd_dir() + "; export LD_LIBRARY_PATH; "
+        setting = (" CC_TOOLS=" + os.path.join(self._cICommon.get_site_cc_apps_path(), "bin") + "; export CC_TOOLS; "
+                   + " OE_DIR=" + self._cICommon.get_site_cc_oe_dir() + "; export OE_DIR; "
+                   + " OE_LICENSE=" + self._cICommon.get_site_cc_oe_licence() + "; export OE_LICENSE; "
+                   + " ACD_DIR=" + self._cICommon.get_site_cc_acd_dir() + "; export ACD_DIR; "
+                   + " CACTVS_DIR=" + self._cICommon.get_site_cc_cactvs_dir() + "; export CACTVS_DIR; "
+                   + " CORINA_DIR=" + os.path.join(self._cICommon.get_site_cc_corina_dir(), "bin") + "; export CORINA_DIR; "
+                   + " BABEL_DIR=" + self._cICommon.get_site_cc_babel_dir() + "; export BABEL_DIR; "
+                   + " BABEL_DATADIR=" + self._cICommon.get_site_cc_babel_datadir() + "; export BABEL_DATADIR; "
+                   + " INCHI_DIR=" + self._cICommon.get_site_cc_inchi_dir() + "; export INCHI_DIR; "
+                   + " LD_LIBRARY_PATH=" + self._cICommon.get_site_cc_babel_lib() + ":" + os.path.join(
+                       self._cICommon.get_site_local_apps_path(), "lib") + ":"
+                   + self._cICommon.get_site_cc_acd_dir() + "; export LD_LIBRARY_PATH; ")
         return setting
 
     def _mmcifDictBashSetting(self):
@@ -149,7 +149,7 @@ class ChemEditorBase(object):
         if os.access(outputFilePath, os.R_OK):
             try:
                 os.rename(outputFilePath, inputFilePath)
-            except:
+            except:  # noqa: E722 pylint: disable=bare-except
                 self._removeFile(inputFilePath)
                 os.rename(outputFilePath, inputFilePath)
             #

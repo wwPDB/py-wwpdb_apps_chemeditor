@@ -15,32 +15,29 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, traceback
+import os
+import sys
+import traceback
 import ntpath
 
-from wwpdb.utils.config.ConfigInfo  import ConfigInfo
-
-#
 
 class Upload(object):
-    """ 
+    """
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__reqObj=reqObj
-        self.__sObj=None
-        self.__sessionId=None
-        self.__sessionPath=None
-        self.__rltvSessionPath=None
-        self.__siteId  = str(self.__reqObj.getValue('WWPDB_SITE_ID'))
-        self.__cI=ConfigInfo(self.__siteId)
-        self.__fileName=None
+        self.__verbose = verbose
+        self.__lfh = log
+        self.__reqObj = reqObj
+        self.__sObj = None
+        self.__sessionId = None
+        self.__sessionPath = None
+        # self.__rltvSessionPath = None
+        self.__fileName = None
         #
         self.__getSession()
         #
@@ -49,14 +46,14 @@ class Upload(object):
         """ Join existing session or create new session as required.
         """
         #
-        self.__sObj=self.__reqObj.newSessionObj()
-        self.__sessionId=self.__sObj.getId()
-        self.__sessionPath=self.__sObj.getPath()
-        self.__rltvSessionPath=self.__sObj.getRelativePath()
+        self.__sObj = self.__reqObj.newSessionObj()
+        self.__sessionId = self.__sObj.getId()
+        self.__sessionPath = self.__sObj.getPath()
+        # self.__rltvSessionPath = self.__sObj.getRelativePath()
         if (self.__verbose):
-            self.__lfh.write("------------------------------------------------------\n")                    
+            self.__lfh.write("------------------------------------------------------\n")
             self.__lfh.write("+Upload.__getSession() - creating/joining session %s\n" % self.__sessionId)
-            self.__lfh.write("+Upload.__getSession() - session path %s\n" % self.__sessionPath)            
+            self.__lfh.write("+Upload.__getSession() - session path %s\n" % self.__sessionPath)
 
     def GetResult(self):
         self.__uploadFile()
@@ -66,7 +63,7 @@ class Upload(object):
         if (self.__verbose):
             self.__lfh.write("+Upload.__uploadFile() - file upload starting\n")
         #
-        # Copy upload file to session directory - 
+        # Copy upload file to session directory -
         #
         try:
             fs = self.__reqObj.getRawValue('data')
@@ -84,15 +81,15 @@ class Upload(object):
                 self.__lfh.write("+Upload.__uploadFile() - upload file %s\n" % fs.filename)
                 self.__lfh.write("+Upload.__uploadFile() - base file   %s\n" % self.__fileName)
             #
-            # Store upload file in session directory - 
+            # Store upload file in session directory -
             #
             fPathAbs = os.path.join(self.__sessionPath, self.__fileName)
-            ofh = open(fPathAbs,'wb')
+            ofh = open(fPathAbs, 'wb')
             ofh.write(fs.file.read())
             ofh.close()
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             if (self.__verbose):
-                self.__lfh.write("+Upload.__uploadFile() File upload processing failed for %s\n" % str(fs.filename) )
+                self.__lfh.write("+Upload.__uploadFile() File upload processing failed for %s\n" % str(fs.filename))
                 traceback.print_exc(file=self.__lfh)
         #
 
