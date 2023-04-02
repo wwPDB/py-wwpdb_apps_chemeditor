@@ -31,6 +31,8 @@ from mmcif.io.PdbxReader import PdbxReader
 from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+from wwpdb.io.locator.ChemRefPathInfo import ChemRefPathInfo
+
 
 
 class CVSCommit(ChemEditorBase):
@@ -114,7 +116,7 @@ class CVSCommit(ChemEditorBase):
         #
         self.getSandBoxFilePath(self.__id)
         self.__sourceFile = os.path.join(self._sessionPath, self.__id + ".cif")
-        self.__targetPath = os.path.join(self._ccPath, self.__id[0], self.__id)
+        self.__targetPath = self._crpi.getFileDir(self.__id, "CC")
 
     def __checkIDExisted(self):
         """ Check if Ligand ID exists
@@ -329,7 +331,7 @@ class CVSCommit(ChemEditorBase):
                 if not comp_id:
                     continue
                 #
-                targetFile = os.path.join(self._ccPath, comp_id[0], comp_id, comp_id + ".cif")
+                targetFile = self._crpi.getFilePath(comp_id, "CC")
                 if (not targetFile) or (not os.access(targetFile, os.F_OK)):
                     errorMessage = "Incorrect parent compId: '" + parent_comp_ids + "'.\n\n"
                     break
@@ -454,27 +456,34 @@ class CVSCommit(ChemEditorBase):
         #
         targetFile = self.getSandBoxFilePath(ccId)
         textList = []
+
+        proj, rel_path = self._crpi.getCvsProjectInfo(ccId, "CC")
+
+        relDir = os.path.dirname(rel_path)
+        projDir = os.path.join(proj, os.path.dirname(relDir))
+        projFile = os.path.join(proj, rel_path)
+
         try:
             if targetFile and os.access(targetFile, os.F_OK):
-                self._cvsAdmin.checkOut(os.path.join(self._ccProjectName, ccId[0], ccId, ccId + ".cif"))
+                self._cvsAdmin.checkOut(projFile)
                 shutil.copy2(sourceFilePath, targetFile)
             else:
-                dstPath = os.path.join(self._ccPath, ccId[0], ccId)
-                targetFile = os.path.join(dstPath, ccId + ".cif")
+                dstPath = self._crpi.getFileDir(ccId, "CC")
+                targetFile = self._crpi.getFilePath(ccId, "CC")
                 if (not os.access(dstPath, os.F_OK)):
                     os.makedirs(dstPath)
-                    ok, text = self._cvsAdmin.add(self._ccProjectName, os.path.join(ccId[0], ccId))
+                    ok, text = self._cvsAdmin.add(proj, relDir)
                     if (not ok) and text:
                         textList.append(text)
                     #
                 #
                 shutil.copy2(sourceFilePath, targetFile)
-                ok, text = self._cvsAdmin.add(self._ccProjectName, os.path.join(ccId[0], ccId, ccId + ".cif"))
+                ok, text = self._cvsAdmin.add(proj, rel_path)
                 if (not ok) and text:
                     textList.append(text)
                 #
             #
-            ok, text = self._cvsAdmin.commit(self._ccProjectName, os.path.join(ccId[0], ccId, ccId + ".cif"))
+            ok, text = self._cvsAdmin.commit(proj, rel_path)
             ok = True
             if (not ok) and text:
                 textList.append(text)
