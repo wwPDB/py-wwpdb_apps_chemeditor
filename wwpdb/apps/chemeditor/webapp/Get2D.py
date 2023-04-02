@@ -15,31 +15,29 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys
+import os
+import sys
 
-from wwpdb.utils.config.ConfigInfo  import ConfigInfo
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 
-#
 
 class Get2D(object):
-    """ 
+    """
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__reqObj=reqObj
-        self.__sObj=None
-        self.__sessionId=None
-        self.__sessionPath=None
-        self.__rltvSessionPath=None
-        self.__siteId  = str(self.__reqObj.getValue('WWPDB_SITE_ID'))
-        self.__cI=ConfigInfo(self.__siteId)
+        self.__verbose = verbose
+        self.__lfh = log
+        self.__reqObj = reqObj
+        self.__sObj = None
+        self.__sessionId = None
+        self.__sessionPath = None
+        # self.__rltvSessionPath = None
+        self.__siteId = str(self.__reqObj.getValue('WWPDB_SITE_ID'))
         self.__cICommon = ConfigInfoAppCommon(self.__siteId)
         #
         self.__getSession()
@@ -49,14 +47,14 @@ class Get2D(object):
         """ Join existing session or create new session as required.
         """
         #
-        self.__sObj=self.__reqObj.newSessionObj()
-        self.__sessionId=self.__sObj.getId()
-        self.__sessionPath=self.__sObj.getPath()
-        self.__rltvSessionPath=self.__sObj.getRelativePath()
+        self.__sObj = self.__reqObj.newSessionObj()
+        self.__sessionId = self.__sObj.getId()
+        self.__sessionPath = self.__sObj.getPath()
+        # self.__rltvSessionPath = self.__sObj.getRelativePath()
         if (self.__verbose):
-            self.__lfh.write("------------------------------------------------------\n")                    
+            self.__lfh.write("------------------------------------------------------\n")
             self.__lfh.write("+Get2D.__getSession() - creating/joining session %s\n" % self.__sessionId)
-            self.__lfh.write("+Get2D.__getSession() - session path %s\n" % self.__sessionPath)            
+            self.__lfh.write("+Get2D.__getSession() - session path %s\n" % self.__sessionPath)
 
     def GetResult(self):
         self.__getInputSdfData()
@@ -66,14 +64,14 @@ class Get2D(object):
 
     def __getInputSdfData(self):
         sdf = self.__reqObj.getValue('sdf')
-        filePath = os.path.join(self.__sessionPath,'in.sdf')
+        filePath = os.path.join(self.__sessionPath, 'in.sdf')
         f = open(filePath, 'w')
         f.write(sdf + '\n')
         f.close()
 
     def __getCACTVSScript(self):
         hflag = str(self.__reqObj.getValue('hflag'))
-        filePath = os.path.join(self.__sessionPath,'script')
+        filePath = os.path.join(self.__sessionPath, 'script')
         f = open(filePath, 'w')
         f.write('set ehandle [molfile read in.sdf]\n')
         if hflag == 'yes':

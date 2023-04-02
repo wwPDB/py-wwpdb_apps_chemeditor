@@ -15,12 +15,15 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,shutil,sys,traceback
+import os
+import shutil
+import sys
+import traceback
 from datetime import datetime
 
 from mmcif.api.DataCategory import DataCategory
@@ -29,22 +32,23 @@ from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 
+
 class CVSCommit(ChemEditorBase):
     """  Class handle CVS commit to chemical component dictionary
     """
-    def __init__(self, reqObj = None, verbose = False, log = sys.stderr):
-        super(CVSCommit, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
+    def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
+        super(CVSCommit, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         self.__templatePath = os.path.join(self._cI.get("SITE_WEB_APPS_TOP_PATH"), "htdocs", "chemeditor")
         self.__cif = None
         self.__id = None
         self.__flag = None
         self.__sourceFile = None
-        self.__reservedIdList = [ "DRG", "INH", "LIG", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", \
-                         "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", \
-                         "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", \
-                         "56", "57", "58", "59", "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", \
-                         "76", "77", "78", "79", "80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95", \
-                         "96", "97", "98", "99" ]
+        self.__reservedIdList = ["DRG", "INH", "LIG", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
+                                 "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35",
+                                 "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55",
+                                 "56", "57", "58", "59", "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75",
+                                 "76", "77", "78", "79", "80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95",
+                                 "96", "97", "98", "99"]
         #
         self.__getData()
 
@@ -78,23 +82,23 @@ class CVSCommit(ChemEditorBase):
                 #
             #
         #
-        __cD={}
+        __cD = {}
         if message1 or message2 or message6:
-            __cD["errorflag"]=True
+            __cD["errorflag"] = True
             if message1:
-                __cD["errortext"]=message1
+                __cD["errortext"] = message1
             elif message2:
-                __cD["errortext"]=message2
+                __cD["errortext"] = message2
             else:
-                __cD["errortext"]=message6
+                __cD["errortext"] = message6
         elif message3:
-            __cD["errorflag1"]=True
-            __cD["errortext1"]=os.path.join(self._rltvSessionPath, "error1.html")
+            __cD["errorflag1"] = True
+            __cD["errortext1"] = os.path.join(self._rltvSessionPath, "error1.html")
         elif message7:
-            __cD["errorflag2"]=True
-            __cD["errortext2"]=os.path.join(self._rltvSessionPath, "error2.html")
+            __cD["errorflag2"] = True
+            __cD["errortext2"] = os.path.join(self._rltvSessionPath, "error2.html")
         else:
-            __cD["errorflag"]=False
+            __cD["errorflag"] = False
         return __cD
 
     def __getData(self):
@@ -113,7 +117,7 @@ class CVSCommit(ChemEditorBase):
         self.__targetPath = os.path.join(self._ccPath, self.__id[0], self.__id)
 
     def __checkIDExisted(self):
-        """ Check if Ligand ID exists 
+        """ Check if Ligand ID exists
         """
         if not self.__targetPath:
             return "CVS commit failed"
@@ -202,11 +206,11 @@ class CVSCommit(ChemEditorBase):
                     start = data.find("<pre>")
                     end = data.find("</pre>")
                     if start >= 0 and end > start + 5:
-                        message = data[start+5:end]
+                        message = data[start + 5:end]
                     start = data.find("+++[")
                     end = data.find("]+++")
                     if start >= 0 and end > start + 5:
-                        message = data[start+5:end]
+                        message = data[start + 5:end]
                     #
                 #
             #
@@ -281,14 +285,14 @@ class CVSCommit(ChemEditorBase):
         #
         error_msg = ""
         for error in errorlist:
-             error_msg += "<li>" + error + "</li>\n"
+            error_msg += "<li>" + error + "</li>\n"
         #
         myD = {}
         myD["id"] = self.__id
         myD["sessionid"] = self._sessionId
         myD["existflag"] = self.__existingFlag
         myD["error"] = error_msg
-        for item in ( "newcodeflag", "instanceid", "parent_sessionid", "filesource", "identifier"):
+        for item in ("newcodeflag", "instanceid", "parent_sessionid", "filesource", "identifier"):
             myD[item] = self._reqObj.getValue(item)
         #
         filePath = os.path.join(self._sessionPath, "error2.html")
@@ -346,7 +350,7 @@ class CVSCommit(ChemEditorBase):
         #
         cifObj = mmCIFUtil(filePath=existingFile)
         #
-        myDataList=[]
+        myDataList = []
         ifh = open(self.__sourceFile, "r")
         pRd = PdbxReader(ifh)
         pRd.read(myDataList)
@@ -354,7 +358,7 @@ class CVSCommit(ChemEditorBase):
         #
         myBlock = myDataList[0]
         compCat = myBlock.getObj("chem_comp")
-        for item in ( "pdbx_initial_date", "pdbx_release_status", "pdbx_replaced_by", "pdbx_replaces" ):
+        for item in ("pdbx_initial_date", "pdbx_release_status", "pdbx_replaced_by", "pdbx_replaces"):
             val = cifObj.GetSingleValue("chem_comp", item)
             if val:
                 compCat.setValue(val, item, 0)
@@ -362,7 +366,7 @@ class CVSCommit(ChemEditorBase):
         #
         existing_audits = cifObj.GetValue("pdbx_chem_comp_audit")
         if existing_audits:
-            items = [ "comp_id", "action_type", "date", "processing_site", "annotator", "details" ]
+            items = ["comp_id", "action_type", "date", "processing_site", "annotator", "details"]
             newAuditCat = DataCategory("pdbx_chem_comp_audit")
             for item in items:
                 newAuditCat.appendAttribute(item)
@@ -475,7 +479,7 @@ class CVSCommit(ChemEditorBase):
             if (not ok) and text:
                 textList.append(text)
             #
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             textList.append("CVS commit failed - CVS update exception")
             traceback.print_exc(file=self._lfh)
         #
@@ -489,20 +493,22 @@ class CVSCommit(ChemEditorBase):
         #
         return ""
 
-    def __processTemplate(self,fn,parameterDict={}):
+    def __processTemplate(self, fn, parameterDict=None):
         """ Read the input HTML template data file and perform the key/value substitutions in the
             input parameter dictionary.
-            
+
             :Params:
                 ``parameterDict``: dictionary where
                 key = name of subsitution placeholder in the template and
                 value = data to be used to substitute information for the placeholder
-                
+
             :Returns:
                 string representing entirety of content with subsitution placeholders now replaced with data
         """
-        fPath=os.path.join(self.__templatePath, fn)
-        ifh=open(fPath,"r")
-        sIn=ifh.read()
+        if parameterDict is None:
+            parameterDict = {}
+        fPath = os.path.join(self.__templatePath, fn)
+        ifh = open(fPath, "r")
+        sIn = ifh.read()
         ifh.close()
-        return (  sIn % parameterDict )
+        return (sIn % parameterDict)

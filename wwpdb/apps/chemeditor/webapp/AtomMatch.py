@@ -15,20 +15,22 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,sys
+import os
+import sys
 
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 
+
 class AtomMatch(ChemEditorBase):
-    """ 
+    """
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        super(AtomMatch, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
+        super(AtomMatch, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         #
         self.__inputFilePath = os.path.join(self._sessionPath, "in.cif")
         self.__matchResultPath = os.path.join(self._sessionPath, "match_result")
@@ -49,7 +51,7 @@ class AtomMatch(ChemEditorBase):
         reverse_flag = self._reqObj.getValue("reverse")
         self._removeFile(self.__matchResultPath)
         #
-        cmd = "cd " + self._sessionPath + " ; " + self._annotBashSetting();
+        cmd = "cd " + self._sessionPath + " ; " + self._annotBashSetting()
         if reverse_flag == 'yes':
             cmd += " ${BINPATH}/GetAtomMatch -first in.cif -second " + ccFilePath
         else:

@@ -16,23 +16,21 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-from logging import log
 import os
 import sys
 import traceback
-import types
 
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
 from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
 
 from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
-#from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
+# from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSCommit
 from wwpdb.apps.chemeditor.webapp.Enumeration import Enumeration
@@ -45,13 +43,11 @@ from wwpdb.apps.chemeditor.webapp.Upload import Upload
 from wwpdb.apps.chemeditor.webapp.DaInternalCombineDb import DaInternalCombineDb
 
 
-#
-
 class ChemEditorWebApp(object):
     """Handle request and response object processing for chemeditor web application.
-    
+
     """
-    def __init__(self,parameterDict={},verbose=False,log=sys.stderr,siteId="WWPDB_DEV"):
+    def __init__(self, parameterDict=None, verbose=False, log=sys.stderr, siteId="WWPDB_DEV"):
         """
         Create an instance of `ChemEditorWebApp` to manage a chemeditor web request.
 
@@ -59,44 +55,46 @@ class ChemEditorWebApp(object):
              Storage model for GET and POST parameter data is a dictionary of lists.
          :param `verbose`:  boolean flag to activate verbose logging.
          :param `log`:      stream for logging.
-          
+
         """
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__debug=False
-        self.__siteId=siteId
-        self.__cI=ConfigInfo(self.__siteId)
-        self.__topPath=self.__cI.get('SITE_WEB_APPS_TOP_PATH')
+        if parameterDict is None:
+            parameterDict = {}
+        self.__verbose = verbose
+        self.__lfh = log
+        self.__debug = False
+        self.__siteId = siteId
+        self.__cI = ConfigInfo(self.__siteId)
+        self.__topPath = self.__cI.get('SITE_WEB_APPS_TOP_PATH')
         #
 
         if isinstance(parameterDict, dict):
-            self.__myParameterDict=parameterDict
+            self.__myParameterDict = parameterDict
         else:
-            self.__myParameterDict={}
+            self.__myParameterDict = {}
 
         if (self.__verbose):
-            self.__lfh.write("+ChemEditorWebApp.__init() - REQUEST STARTING ------------------------------------\n" )
-            self.__lfh.write("+ChemEditorWebApp.__init() - dumping input parameter dictionary \n" )                        
+            self.__lfh.write("+ChemEditorWebApp.__init() - REQUEST STARTING ------------------------------------\n")
+            self.__lfh.write("+ChemEditorWebApp.__init() - dumping input parameter dictionary \n")
             self.__lfh.write("%s" % (''.join(self.__dumpRequest())))
-            
-        self.__reqObj=InputRequest(self.__myParameterDict,verbose=self.__verbose,log=self.__lfh)
-        
-        self.__topSessionPath  = self.__cI.get('SITE_WEB_APPS_TOP_SESSIONS_PATH')
+
+        self.__reqObj = InputRequest(self.__myParameterDict, verbose=self.__verbose, log=self.__lfh)
+
+        self.__topSessionPath = self.__cI.get('SITE_WEB_APPS_TOP_SESSIONS_PATH')
         #
         self.__reqObj.setValue("TopSessionPath", self.__topSessionPath)
-        self.__reqObj.setValue("TopPath",        self.__topPath)
-        self.__reqObj.setValue("WWPDB_SITE_ID",  self.__siteId)
-        os.environ["WWPDB_SITE_ID"]=self.__siteId
+        self.__reqObj.setValue("TopPath", self.__topPath)
+        self.__reqObj.setValue("WWPDB_SITE_ID", self.__siteId)
+        os.environ["WWPDB_SITE_ID"] = self.__siteId
         #
         self.__reqObj.setReturnFormat(return_format="html")
         #
         if (self.__verbose):
             self.__lfh.write("-----------------------------------------------------\n")
-            self.__lfh.write("+ChemEditorWebApp.__init() Leaving _init with request contents\n" )            
+            self.__lfh.write("+ChemEditorWebApp.__init() Leaving _init with request contents\n")
             self.__reqObj.printIt(ofh=self.__lfh)
-            self.__lfh.write("---------------ChemEditorWebApp - done -------------------------------\n")   
+            self.__lfh.write("---------------ChemEditorWebApp - done -------------------------------\n")
             self.__lfh.flush()
-            
+
     def doOp(self):
         """ Execute request and package results in response dictionary.
 
@@ -105,17 +103,17 @@ class ChemEditorWebApp(object):
              Minimally, the content of this dictionary will include the
              keys: CONTENT_TYPE and REQUEST_STRING.
         """
-        stw=ChemEditorWebAppWorker(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
-        rC=stw.doOp()
+        stw = ChemEditorWebAppWorker(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
+        rC = stw.doOp()
         if (self.__debug):
-            rqp=self.__reqObj.getRequestPath()
+            rqp = self.__reqObj.getRequestPath()
             self.__lfh.write("+ChemEditorWebApp.doOp() operation %s\n" % rqp)
             self.__lfh.write("+ChemEditorWebApp.doOp() return format %s\n" % self.__reqObj.getReturnFormat())
             if rC is not None:
                 self.__lfh.write("%s" % (''.join(rC.dump())))
             else:
                 self.__lfh.write("+ChemEditorWebApp.doOp() return object is empty\n")
-                
+
         #
         # Package return according to the request return_format -
         #
@@ -126,103 +124,103 @@ class ChemEditorWebApp(object):
            containing data from the input web request.
 
            :Returns:
-               ``list`` of formatted text lines 
+               ``list`` of formatted text lines
         """
-        retL=[]
-        retL.append("\n\-----------------ChemEditorWebApp().__dumpRequest()-----------------------------\n")
-        retL.append("Parameter dictionary length = %d\n" % len(self.__myParameterDict))            
-        for k,vL in self.__myParameterDict.items():
+        retL = []
+        retL.append("\n-----------------ChemEditorWebApp().__dumpRequest()-----------------------------\n")
+        retL.append("Parameter dictionary length = %d\n" % len(self.__myParameterDict))
+        for k, vL in self.__myParameterDict.items():
             retL.append("Parameter %30s :" % k)
             for v in vL:
                 retL.append(" ->  %s\n" % v)
-        retL.append("-------------------------------------------------------------\n")                
+        retL.append("-------------------------------------------------------------\n")
         return retL
 
+
 class ChemEditorWebAppWorker(object):
-    def __init__(self, reqObj=None, verbose=False,log=sys.stderr):
+    def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         """
          Worker methods for the chemical component editor application
 
          Performs URL - application mapping and application launching
          for chemical component editor tool.
-         
+
          All operations can be driven from this interface which can
          supplied with control information from web application request
          or from a testing application.
         """
-        self.__verbose=verbose
-        self.__lfh=log
-        self.__reqObj=reqObj
-        self.__siteId  = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
-        self.__cI=ConfigInfo(self.__siteId)
+        self.__verbose = verbose
+        self.__lfh = log
+        self.__reqObj = reqObj
+        self.__siteId = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
         self.__cICommon = ConfigInfoAppCommon(self.__siteId)
         #
-        self.__appPathD={'/service/environment/dump':                   '_dumpOp',
-                         '/service/chemeditor/get_2d':                  '_get2D',
-                         '/service/chemeditor/upload':                  '_upLoad',
-                         '/service/chemeditor/get_ligand':              '_getLigand',
-                         '/service/chemeditor/search':                  '_searchLigand',
-                         '/service/chemeditor/atom_match':              '_atomMatch',
-                         '/service/chemeditor/echo_file':               '_echoFileDownLoad',
-                         '/service/chemeditor/get_new_code':            '_getNewCode',
-                         '/service/chemeditor/status_code':             '_getStatusCode',
-                         '/service/chemeditor/one_letter_code':         '_getOneLetterCode',
-                         '/service/chemeditor/update':                  '_updateLigand',
-                         '/service/chemeditor/save_component':          '_saveComponent',
-                         '/service/chemeditor/cvs_commit':              '_CVSCommit',
-                         '/service/chemeditor/get_enumeration':         '_getEnumeration',
-                         '/service/chemeditor/get_entries_with_ligand': '_getEntriesWithLigands'
-                         }
-        
+        self.__appPathD = {'/service/environment/dump': '_dumpOp',
+                           '/service/chemeditor/get_2d': '_get2D',
+                           '/service/chemeditor/upload': '_upLoad',
+                           '/service/chemeditor/get_ligand': '_getLigand',
+                           '/service/chemeditor/search': '_searchLigand',
+                           '/service/chemeditor/atom_match': '_atomMatch',
+                           '/service/chemeditor/echo_file': '_echoFileDownLoad',
+                           '/service/chemeditor/get_new_code': '_getNewCode',
+                           '/service/chemeditor/status_code': '_getStatusCode',
+                           '/service/chemeditor/one_letter_code': '_getOneLetterCode',
+                           '/service/chemeditor/update': '_updateLigand',
+                           '/service/chemeditor/save_component': '_saveComponent',
+                           '/service/chemeditor/cvs_commit': '_CVSCommit',
+                           '/service/chemeditor/get_enumeration': '_getEnumeration',
+                           '/service/chemeditor/get_entries_with_ligand': '_getEntriesWithLigands'
+                           }
+
     def doOp(self):
-        """Map operation to path and invoke operation.  
-        
+        """Map operation to path and invoke operation.
+
             :Returns:
 
             Operation output is packaged in a ResponseContent() object.
         """
         return self.__doOpException()
-    
-    def __doOpNoException(self):
+
+    def __doOpNoException(self):  # pylint: disable=unused-private-member
         """Map operation to path and invoke operation.  No exception handling is performed.
-        
+
             :Returns:
 
             Operation output is packaged in a ResponseContent() object.
         """
         #
-        reqPath=self.__reqObj.getRequestPath()
-        if not reqPath in self.__appPathD:
+        reqPath = self.__reqObj.getRequestPath()
+        if reqPath not in self.__appPathD:
             # bail out if operation is unknown -
-            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
             rC.setError(errMsg='Unknown operation')
             return rC
         else:
-            mth=getattr(self,self.__appPathD[reqPath],None)
-            rC=mth()
+            mth = getattr(self, self.__appPathD[reqPath], None)
+            rC = mth()
         return rC
 
     def __doOpException(self):
         """Map operation to path and invoke operation.  Exceptions are caught within this method.
-        
+
             :Returns:
 
             Operation output is packaged in a ResponseContent() object.
         """
         #
         try:
-            reqPath=self.__reqObj.getRequestPath()
-            if not reqPath in self.__appPathD:
+            reqPath = self.__reqObj.getRequestPath()
+            if reqPath not in self.__appPathD:
                 # bail out if operation is unknown -
-                rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+                rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
                 rC.setError(errMsg='Unknown operation')
             else:
-                mth=getattr(self,self.__appPathD[reqPath],None)
-                rC=mth()
+                mth = getattr(self, self.__appPathD[reqPath], None)
+                rC = mth()
             return rC
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             traceback.print_exc(file=self.__lfh)
-            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+            rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
             rC.setError(errMsg='Operation failure')
             return rC
 
@@ -232,10 +230,10 @@ class ChemEditorWebAppWorker(object):
     # ------------------------------------------------------------------------------------------------------------
     #
     def _dumpOp(self):
-        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose,log=self.__lfh)
+        rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         rC.setHtmlList(self.__reqObj.dump(format='html'))
         return rC
-    
+
     def _get2D(self):
         """ Get 2D SDF file
         """
@@ -253,7 +251,7 @@ class ChemEditorWebAppWorker(object):
             rC.setText(text=textcontent)
         #
         return rC
-    
+
     def _upLoad(self):
         """ Get upload file
         """
@@ -267,7 +265,7 @@ class ChemEditorWebAppWorker(object):
         rC.setHtmlText(classObj.GetResult())
         #
         return rC
-    
+
     def _getLigand(self):
         """ Get chemical component cif file from ID
         """
@@ -285,7 +283,7 @@ class ChemEditorWebAppWorker(object):
             rC.setText(text=textcontent)
         #
         return rC
-    
+
     def _searchLigand(self):
         """ Search chemical component dictionary
         """
@@ -303,7 +301,7 @@ class ChemEditorWebAppWorker(object):
             rC.setText(text=textcontent)
         #
         return rC
-    
+
     def _atomMatch(self):
         """ Get matahed atom pair list for two chemical components
         """
@@ -321,7 +319,7 @@ class ChemEditorWebAppWorker(object):
             rC.setText(text=textcontent)
         #
         return rC
-    
+
     def _echoFileDownLoad(self):
         """ Echo chemical component cif file downloading
         """
@@ -329,7 +327,7 @@ class ChemEditorWebAppWorker(object):
             self.__lfh.write("+ChemEditorWebAppWorker._echoFileDownLoad() Starting now\n")
         #
         sObj = self.__reqObj.newSessionObj()
-        sessionId = sObj.getId()
+        _sessionId = sObj.getId()  # noqa: F841
         sessionPath = sObj.getPath()
         #
         data = self.__reqObj.getValue('download')
@@ -344,7 +342,7 @@ class ChemEditorWebAppWorker(object):
         #
         self.__reqObj.setReturnFormat(return_format="binary")
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
-        rC.setBinaryFile(filePath, attachmentFlag = True, serveCompressed = True)
+        rC.setBinaryFile(filePath, attachmentFlag=True, serveCompressed=True)
         #
         return rC
 
@@ -502,7 +500,7 @@ class ChemEditorWebAppWorker(object):
             rC.addDictionaryItems(myD)
         #
         return rC
-    
+
     def _getEntriesWithLigands(self):
         """Get depositions containing the requested ligand.
 
@@ -516,18 +514,19 @@ class ChemEditorWebAppWorker(object):
         self.__reqObj.setReturnFormat(return_format="json")
         rC = ResponseContent(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         #
-        
+
         try:
             combine_db = DaInternalCombineDb(siteId=self.__siteId, verbose=True, log=self.__lfh)
             entries = combine_db.getEntriesWithLigand(self.__reqObj.getValue("ccid"))
             rC.setData(entries)
-        except:
+        except:  # noqa: E722 pylint: disable=bare-except
             rC.setError("Could not open a connection to the database")
         #
         return rC
 
+
 if __name__ == '__main__':
-    sTool=ChemEditorWebApp()
-    d=sTool.doOp()
-    for k,v in d.items():
-        sys.stdout.write("Key - %s  value - %r\n" % (k,v))
+    sTool = ChemEditorWebApp()
+    d = sTool.doOp()
+    for k_, v_ in d.items():
+        sys.stdout.write("Key - %s  value - %r\n" % (k_, v_))

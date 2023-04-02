@@ -15,21 +15,22 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys, string, traceback
+import sys
 
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 
+
 class GetLigand(ChemEditorBase):
-    """ 
+    """
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        super(GetLigand, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
+        super(GetLigand, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         #
         self.__ccFilePath = self._getCcFilePathWithWebRequstId()
         self.__cifObj = None

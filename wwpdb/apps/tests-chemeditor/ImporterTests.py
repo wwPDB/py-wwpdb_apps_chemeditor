@@ -14,23 +14,7 @@ __version__ = "V0.01"
 
 import unittest
 
-try:
-    # openeye issue
-    from wwpdb.apps.chemeditor.webapp.ChemEditorWebApp import ChemEditorWebApp
-except ImportError:
-    from wwpdb.io.file.mmCIFUtil import mmCIFUtil
-    from wwpdb.utils.config.ConfigInfo import ConfigInfo
-    from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
-
-    from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
-    from wwpdb.apps.chemeditor.webapp.CVSCommit import CVSCommit
-    from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
-    from wwpdb.apps.chemeditor.webapp.Get2D import Get2D
-    from wwpdb.apps.chemeditor.webapp.GetLigand import GetLigand
- #   from wwpdb.apps.chemeditor.webapp.SaveLigand import SaveLigand
-    from wwpdb.apps.chemeditor.webapp.Search import Search
-    from wwpdb.apps.chemeditor.webapp.UpdateLigand import UpdateLigand
-    from wwpdb.apps.chemeditor.webapp.Upload import Upload
+from wwpdb.apps.chemeditor.webapp.ChemEditorWebApp import ChemEditorWebApp
 
 
 class ImportTests(unittest.TestCase):
@@ -39,4 +23,4 @@ class ImportTests(unittest.TestCase):
 
     def testInstantiate(self):
         """Tests simple instantiation"""
-        pass
+        ChemEditorWebApp()

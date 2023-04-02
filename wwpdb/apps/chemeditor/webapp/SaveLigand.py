@@ -15,22 +15,25 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, shutil, sys
+import os
+import shutil
+import sys
 
-from wwpdb.apps.ccmodule.io.ChemCompAssignDataStore          import ChemCompAssignDataStore
+from wwpdb.apps.ccmodule.io.ChemCompAssignDataStore import ChemCompAssignDataStore
 from wwpdb.apps.ccmodule.reports.ChemCompAlignImageGenerator import ChemCompAlignImageGenerator
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 
+
 class SaveLigand(ChemEditorBase):
-    """ 
+    """
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        super(SaveLigand, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
+        super(SaveLigand, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         self.__instanceId = str(self._reqObj.getValue("instanceid"))
         self.__subpath = str(self._reqObj.getValue("subpath"))
         self.__filextension = str(self._reqObj.getValue("filextension"))
@@ -54,7 +57,7 @@ class SaveLigand(ChemEditorBase):
         if os.access(updatedFilePath, os.R_OK):
             try:
                 os.rename(updatedFilePath, instanceFilePath)
-            except:
+            except:  # noqa: E722 pylint: disable=bare-except
                 self._removeFile(instanceFilePath)
                 os.rename(updatedFilePath, instanceFilePath)
             #

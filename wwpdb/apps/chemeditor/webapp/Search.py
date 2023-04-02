@@ -15,25 +15,27 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os, sys
+import os
+import sys
 from operator import itemgetter
 
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 
+
 class Search(ChemEditorBase):
-    """ 
+    """
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        super(Search, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
+        super(Search, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         #
-        self.__standardComponents = ( "ALA", "ARG", "ASN", "ASP", "CYS", "GLU", "GLN", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "PHE", \
-                                      "PRO", "SER", "THR", "TRP", "TYR", "VAL", "A", "C", "G", "T", "U", "DA", "DC", "DG", "DT", "DU")
+        self.__standardComponents = ("ALA", "ARG", "ASN", "ASP", "CYS", "GLU", "GLN", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "PHE",
+                                     "PRO", "SER", "THR", "TRP", "TYR", "VAL", "A", "C", "G", "T", "U", "DA", "DC", "DG", "DT", "DU")
         #
         self.__idMap = {}
         self.__idList = []
@@ -95,11 +97,11 @@ class Search(ChemEditorBase):
             if vlist[4] in self.__standardComponents:
                 standard = 0
             #
-            self.__idList.append( (vlist[4], diff, standard) )
+            self.__idList.append((vlist[4], diff, standard))
         #
 
     def __isValidId(self, ccId):
-        filePath = self.getSandBoxFilePath(ccId) 
+        filePath = self.getSandBoxFilePath(ccId)
         if (not filePath) or (not os.access(filePath, os.F_OK)):
             return False
         #

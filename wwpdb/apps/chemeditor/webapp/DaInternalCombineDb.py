@@ -3,13 +3,15 @@ import sys
 from wwpdb.apps.chemeditor.webapp.Utils import setupLog
 from wwpdb.utils.db.MyConnectionBase import MyConnectionBase
 
+
 class DaInternalCombineDb(object):
     def __init__(self, siteId=None, verbose=False, log=sys.stderr):
+
         self._mydb = None
         self._siteId = siteId
         self.logger = setupLog(verbose, log)
         self._open()
-    
+
     def __enter__(self):
         return self
 
@@ -32,7 +34,7 @@ class DaInternalCombineDb(object):
 
         if not ok:
             self._mydb = None
-            raise Exception("Error opening connection to DA_INTERNAL_COMBINE")
+            raise Exception("Error opening connection to DA_INTERNAL_COMBINE")  # pylint: disable=broad-exception-raised
 
         return True
 
@@ -40,7 +42,7 @@ class DaInternalCombineDb(object):
         if self._mydb:
             self._mydb.closeConnection()
             self._mydb = None
-    
+
     def getEntriesWithLigand(self, ccId):
         """Get entries in pdbx_entity_nonpoly table that
         have a given ligand.
@@ -52,13 +54,13 @@ class DaInternalCombineDb(object):
             list: list containing entries (dep ids) containing the ligid
         """
         query = "select Structure_ID from pdbx_entity_nonpoly where comp_id = %s"
-        
+
         self.logger.debug("querying entries with ligand %s", ccId)
 
         depIds = []
 
         if self._mydb is None:
-            raise Exception("Error opening connection to database")
+            raise Exception("Error opening connection to database")  # pylint: disable=broad-exception-raised
 
         cursor = self._mydb.getCursor()
         cursor.execute(query, (ccId,))

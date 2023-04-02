@@ -15,23 +15,25 @@ License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
 __docformat__ = "restructuredtext en"
-__author__    = "Zukang Feng"
-__email__     = "zfeng@rcsb.rutgers.edu"
-__license__   = "Creative Commons Attribution 3.0 Unported"
-__version__   = "V0.07"
+__author__ = "Zukang Feng"
+__email__ = "zfeng@rcsb.rutgers.edu"
+__license__ = "Creative Commons Attribution 3.0 Unported"
+__version__ = "V0.07"
 
-import os,sys
+import os
+import sys
 
 from mmcif.io.PdbxReader import PdbxReader
 from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 
+
 class UpdateLigand(ChemEditorBase):
-    """ 
+    """
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
-        super(UpdateLigand, self).__init__(reqObj = reqObj, verbose = verbose, log = log)
+        super(UpdateLigand, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         #
         self.__pdbId = str(self._reqObj.getValue("pdbid")).upper()
         self.__annotator = str(self._reqObj.getValue("annotator"))
@@ -80,7 +82,7 @@ class UpdateLigand(ChemEditorBase):
         if not os.access(filePath, os.R_OK):
             return
         #
-        myDataList=[]
+        myDataList = []
         ifh = open(filePath, "r")
         pRd = PdbxReader(ifh)
         pRd.read(myDataList)
