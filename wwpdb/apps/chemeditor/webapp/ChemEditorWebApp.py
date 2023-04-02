@@ -153,6 +153,7 @@ class ChemEditorWebAppWorker(object):
         self.__lfh = log
         self.__reqObj = reqObj
         self.__siteId = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
+        self.__cIAppCc = ConfigInfoAppCc(self.__siteId, verbose=verbose, log=log)
         #
         self.__appPathD = {'/service/environment/dump': '_dumpOp',
                            '/service/chemeditor/get_2d': '_get2D',

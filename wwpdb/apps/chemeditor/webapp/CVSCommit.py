@@ -31,8 +31,6 @@ from mmcif.io.PdbxReader import PdbxReader
 from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
-from wwpdb.io.locator.ChemRefPathInfo import ChemRefPathInfo
-
 
 
 class CVSCommit(ChemEditorBase):
@@ -460,7 +458,6 @@ class CVSCommit(ChemEditorBase):
         proj, rel_path = self._crpi.getCvsProjectInfo(ccId, "CC")
 
         relDir = os.path.dirname(rel_path)
-        projDir = os.path.join(proj, os.path.dirname(relDir))
         projFile = os.path.join(proj, rel_path)
 
         try:
