@@ -26,7 +26,7 @@ import sys
 import traceback
 
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
-from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCc
 from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
 
 from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
@@ -153,7 +153,7 @@ class ChemEditorWebAppWorker(object):
         self.__lfh = log
         self.__reqObj = reqObj
         self.__siteId = str(self.__reqObj.getValue("WWPDB_SITE_ID"))
-        self.__cICommon = ConfigInfoAppCommon(self.__siteId)
+        self.__cIAppCc = ConfigInfoAppCc(self.__siteId, verbose=verbose, log=log)
         #
         self.__appPathD = {'/service/environment/dump': '_dumpOp',
                            '/service/chemeditor/get_2d': '_get2D',
@@ -369,7 +369,7 @@ class ChemEditorWebAppWorker(object):
         """
         cvsUtil = ChemEditorBase(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         code = ''
-        filePath = os.path.join(self.__cICommon.get_unused_ccd_file())
+        filePath = os.path.join(self.__cIAppCc.get_unused_ccd_file())
         self.__lfh.write("+ChemEditorWebAppWorker.__getNewCodeFromList filePath=%s\n" % filePath)
         f = open(filePath, 'r')
         data = f.read()

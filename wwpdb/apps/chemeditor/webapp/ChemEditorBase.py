@@ -24,8 +24,10 @@ import os
 import sys
 
 from wwpdb.io.cvs.CvsAdmin import CvsSandBoxAdmin
+from wwpdb.io.locator.ChemRefPathInfo import ChemRefPathInfo
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCommon
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCc
 
 
 class ChemEditorBase(object):
@@ -43,9 +45,12 @@ class ChemEditorBase(object):
         self.__siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
         self._cI = ConfigInfo(self.__siteId)
         self._cICommon = ConfigInfoAppCommon(self.__siteId)
-        self.__sbTopPath = self._cICommon.get_site_refdata_top_cvs_sb_path()  # "/wwpdb_da/da_top/reference/components"
+        self._cIAppCc = ConfigInfoAppCc(self.__siteId)
+        self.__sbTopPath = self._cIAppCc.get_site_refdata_top_cvs_sb_path()  # "/wwpdb_da/da_top/reference/components"
         self._ccProjectName = self._cI.get("SITE_REFDATA_PROJ_NAME_CC")  # "ligand-dict-v3"
-        self._ccPath = self._cICommon.get_site_cc_cvs_path()
+        self._ccPath = self._cIAppCc.get_site_cc_cvs_path()
+        self._crpi = ChemRefPathInfo(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
+
         #
         self.__getSession()
         #
@@ -54,13 +59,16 @@ class ChemEditorBase(object):
     def getSandBoxFilePath(self, ccId):
         """ Return full sandbox chemical component file path
         """
-        filePath = os.path.join(self._ccPath, ccId[0], ccId, ccId + ".cif")
+
+        filePath = self._crpi.getFilePath(ccId, "CC")
         self._lfh.write("enter ChemEditorBase.getSandBoxFilePath for ccId=%s filePath=%s\n" % (ccId, filePath))
         if os.access(filePath, os.F_OK):
             return filePath
         #
         self._lfh.write("ChemEditorBase.getSandBoxFilePath running checkOut\n")
-        self._cvsAdmin.checkOut(os.path.join(self._ccProjectName, ccId[0], ccId))
+        proj, rel_path = self._crpi.getCvsProjectInfo(ccId, "CC")
+        fileDir = os.path.dirname(os.path.join(proj, rel_path))
+        self._cvsAdmin.checkOut(fileDir)
         # self._cvsAdmin.cleanup()
         #
         if os.access(filePath, os.F_OK):
@@ -81,7 +89,7 @@ class ChemEditorBase(object):
         """
         """
         setting = " RCSBROOT=" + self._cICommon.get_site_annot_tools_path() + "; export RCSBROOT; " \
-                  + " COMP_PATH=" + self._cICommon.get_site_cc_cvs_path() + "; export COMP_PATH; " \
+                  + " COMP_PATH=" + self._cIAppCc.get_site_cc_cvs_path() + "; export COMP_PATH; " \
                   + " BINPATH=${RCSBROOT}/bin; export BINPATH; "
         return setting
 
@@ -116,9 +124,9 @@ class ChemEditorBase(object):
         """
         """
         setting = []
-        setting.append(" CC_DICT={}; export CC_DICT; ".format(self._cICommon.get_site_cc_dict_path()))
-        setting.append(" CC_IDX_FILE={}; export CC_IDX_FILE; ".format(self._cICommon.get_cc_dict_idx()))
-        setting.append(" CC_SDB_FILE={}; export CC_SDB_FILE; ".format(self._cICommon.get_cc_dict_serial()))
+        setting.append(" CC_DICT={}; export CC_DICT; ".format(self._cIAppCc.get_site_cc_dict_path()))
+        setting.append(" CC_IDX_FILE={}; export CC_IDX_FILE; ".format(self._cIAppCc.get_cc_dict_idx()))
+        setting.append(" CC_SDB_FILE={}; export CC_SDB_FILE; ".format(self._cIAppCc.get_cc_dict_serial()))
         return ''.join(setting)
 
     def _runCmd(self, cmd):
