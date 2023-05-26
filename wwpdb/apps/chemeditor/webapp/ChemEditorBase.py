@@ -48,7 +48,6 @@ class ChemEditorBase(object):
         self._cIAppCc = ConfigInfoAppCc(self.__siteId)
         self.__sbTopPath = self._cIAppCc.get_site_refdata_top_cvs_sb_path()  # "/wwpdb_da/da_top/reference/components"
         self._ccProjectName = self._cI.get("SITE_REFDATA_PROJ_NAME_CC")  # "ligand-dict-v3"
-        self._ccPath = self._cIAppCc.get_site_cc_cvs_path()
         self._crpi = ChemRefPathInfo(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
 
         #
