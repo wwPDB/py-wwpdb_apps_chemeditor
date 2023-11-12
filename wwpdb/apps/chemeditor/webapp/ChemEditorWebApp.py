@@ -409,7 +409,7 @@ class ChemEditorWebAppWorker(object):
         # Lists of thresholds to notify on
         crossList = [500, 250, 100, 50, 25, 10, 5, 4, 2, 1]
 
-        presize = len(data)
+        presize = len(idlist)
         postsize = presize - idx
         notify = threshold_crossed(presize, postsize, crossList)
         if notify:
