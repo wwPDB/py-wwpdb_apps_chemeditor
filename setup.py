@@ -41,7 +41,7 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     #
-    install_requires=["wwpdb.utils.config ~= 0.34", "wwpdb.io ~= 0.27", "wwpdb.apps.ccmodule >= 0.4", "wwpdb.utils.db", "wwpdb.utils.session"],
+    install_requires=["wwpdb.utils.config ~= 0.34", "wwpdb.io ~= 0.33.1", "wwpdb.apps.ccmodule >= 0.4", "wwpdb.utils.db", "wwpdb.utils.session"],
     packages=find_packages(exclude=["wwpdb.apps.tests-chemeditor", "mock-data"]),
     # Enables Manifest to be used
     # include_package_data = True,

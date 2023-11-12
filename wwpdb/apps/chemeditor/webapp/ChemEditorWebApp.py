@@ -28,6 +28,7 @@ import traceback
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCc
 from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
+from wwpdb.io.misc.SendEmail import SendEmail
 
 from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
 # from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
@@ -41,6 +42,16 @@ from wwpdb.apps.chemeditor.webapp.Search import Search
 from wwpdb.apps.chemeditor.webapp.UpdateLigand import UpdateLigand
 from wwpdb.apps.chemeditor.webapp.Upload import Upload
 from wwpdb.apps.chemeditor.webapp.DaInternalCombineDb import DaInternalCombineDb
+
+
+def threshold_crossed(pre, post, thresholdList):
+    """Returns True if going from pre to post crosses a value in the thresholdList.
+       pre > post
+    """
+    for th in thresholdList:
+        if pre > th and post <= th:
+            return True
+    return False
 
 
 class ChemEditorWebApp(object):
@@ -393,6 +404,29 @@ class ChemEditorWebAppWorker(object):
         f = open(filePath, 'w')
         f.write(data)
         f.close()
+
+        # Notify if need be
+        # Lists of thresholds to notify on
+        crossList = [500, 250, 100, 50, 25, 10, 5, 4, 2, 1]
+
+        presize = len(idlist)
+        postsize = presize - idx
+        notify = threshold_crossed(presize, postsize, crossList)
+        if notify:
+            self.__lfh.write("+ChemEditorWebAppWorker.__getNewCodeFromList threshold notification len=%s\n" % postsize)
+            if self.__reqObj.getValue("debug_no_notify"):
+                # Turn off notification
+                self.__lfh.write("+ChemEditorWebAppWorker.__getNewCodeFromList skip threshold notification\n")
+            else:
+                se = SendEmail(self.__siteId, self.__verbose, self.__lfh)
+                subj = "CCD count warning : ID left = %r" % postsize
+                body = f"Warning - the number of CCDs left to be assigned is {postsize}\n"
+                body += f"for siteId {self.__siteId}"
+                status = se.send_system_error(body, subj)
+                if not status:
+                    self.__lfh.write("+ChemEditorWebAppWorker.__getNewCodeFromList failed to send notification\n")
+
+        # Notification complete, return code
         return code
 
     def _getStatusCode(self):
