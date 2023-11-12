@@ -29,7 +29,7 @@ configMock = MagicMock(**configInfoMockConfig)
 sys.modules['wwpdb.utils.config.ConfigInfo'] = Mock(ConfigInfo=configMock)
 
 # These must be after the definitions - before wwpdb.utils.config imported anywhere
-from wwpdb.apps.chemeditor.webapp.ChemEditorWebApp import ChemEditorWebAppWorker  # noqa: E402
+from wwpdb.apps.chemeditor.webapp.ChemEditorWebApp import ChemEditorWebAppWorker, threshold_crossed  # noqa: E402
 from wwpdb.utils.session.WebRequest import InputRequest  # noqa: E402
 
 
@@ -80,7 +80,19 @@ class ChemEditorWebAppTests(unittest.TestCase):
 
         cewa = ChemEditorWebAppWorker(self._reqObj, self._verbose, self._lfh)
         self._reqObj.setValue("request_path", "/service/chemeditor/get_new_code")
+        # Do not send email during testing
+        self._reqObj.setValue("debug_no_notify", "True")
+
         response = json.loads(cewa.doOp().get()['RETURN_STRING'])
         self.assertEqual(response['textcontent'], '1AB')
         response = json.loads(cewa.doOp().get()['RETURN_STRING'])
         self.assertEqual(response['textcontent'], 'CDEFG')
+
+    def testThreshold(self):
+        """Tests retrieval of the next CCD code"""
+
+        crossList = [500, 250, 100, 50, 25, 10, 5, 4, 2, 1]
+        self.assertFalse(threshold_crossed(510, 502, crossList))
+        self.assertTrue(threshold_crossed(502, 500, crossList))
+        self.assertTrue(threshold_crossed(101, 100, crossList))
+        self.assertFalse(threshold_crossed(100, 99, crossList))
