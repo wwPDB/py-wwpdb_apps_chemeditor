@@ -60,6 +60,7 @@ class CVSCommit(ChemEditorBase):
         message3 = ""
         message4 = ""
         message5 = ""
+        messageBackboneError = ""
         message6 = ""
         message7 = ""
         #
@@ -73,12 +74,19 @@ class CVSCommit(ChemEditorBase):
                     if not message3:
                         message4 = self.__checkComp()
                         message5 = self.__checkDuplicate()
-                        if (not message4) and (not message5):
+                        messageBackboneError = self.__checkPeptideBackboneAssigned()
+                        if (
+                            (not message4)
+                            and (not message5)
+                            and (not messageBackboneError)
+                        ):
                             message6 = self.__commitCVS()
                         #
                     #
-                if message4 or message5:
-                    message7 = self.__writeError2(message4, message5)
+                if message4 or message5 or messageBackboneError:
+                    message7 = self.__writeError2(
+                        message4, message5, messageBackboneError
+                    )
                 #
             #
         #
@@ -264,7 +272,7 @@ class CVSCommit(ChemEditorBase):
         #
         return self.__cvsCommit(self.__id, self.__sourceFile)
 
-    def __writeError2(self, error1, error2):
+    def __writeError2(self, error1, error2, error3):
         """ Write error message html page
         """
         errorlist = []
@@ -279,6 +287,9 @@ class CVSCommit(ChemEditorBase):
         #
         if error2:
             errorlist.append(error2)
+        #
+        if error3:
+            errorlist.append(error3)
         #
         if not errorlist:
             return ""
@@ -341,6 +352,102 @@ class CVSCommit(ChemEditorBase):
             cifObj.WriteCif(outputFilePath=self.__sourceFile)
         #
         return errorMessage
+
+    def __checkPeptideBackboneAssigned(self):
+        """Check peptide CCDs have expected backbone and terminal flags
+
+        For Peptide CCDs return error if they have:
+          - <2 backbone atoms flagged as 'Y'
+          - No N-terminal atoms flagged as 'Y'
+          - No C-terminal atoms flagged as 'Y'
+        """
+
+        peptide_types = [
+            "L-PEPTIDE LINKING",
+            "PEPTIDE-LIKE",
+            "D-PEPTIDE LINKING",
+            "PEPTIDE LINKING",
+            "L-PEPTIDE NH3 AMINO TERMINUS",
+            "L-PEPTIDE COOH CARBOXY TERMINUS",
+            "D-PEPTIDE COOH CARBOXY TERMINUS",
+            "L-PEPTIDE NH3 AMINO TERMINUS",
+            "D-PEPTIDE NH3 AMINO TERMINUS",
+            "L-GAMMA-PEPTIDE, C-DELTA LINKING",
+            "D-BETA-PEPTIDE, C-GAMMA LINKING",
+            "D-GAMMA-PEPTIDE, C-DELTA LINKING",
+            "L-BETA-PEPTIDE, C-GAMMA LINKING",
+        ]
+
+        error_message = ""
+
+        if (not self.__sourceFile) or (not os.access(self.__sourceFile, os.R_OK)):
+            return "WARNING - Backbone check failed, CCD source file could not be read."
+
+        cifObj = mmCIFUtil(filePath=self.__sourceFile)
+
+        # Set check to run only if peptide CCD
+        ccd_pdbx_type = cifObj.GetSingleValue("chem_comp", "pdbx_type")
+        ccd_type = cifObj.GetSingleValue("chem_comp", "type")
+
+        run_check = False
+        if ccd_pdbx_type.upper() == "ATOMP":
+            run_check = True
+        elif ccd_type.upper() in peptide_types:
+            run_check = True
+
+        if run_check:
+            num_backbone_atoms_assigned = 0
+            n_term_atoms_assigned = False
+            c_term_atoms_assigned = False
+
+            # Check backbone/terminal annotation
+            chem_comp_atom = cifObj.GetValue("chem_comp_atom")
+            for d in chem_comp_atom:
+                if (
+                    "pdbx_backbone_atom_flag" in d
+                    and d["pdbx_backbone_atom_flag"] == "Y"
+                ):
+                    num_backbone_atoms_assigned += 1
+
+                if (
+                    "pdbx_n_terminal_atom_flag" in d
+                    and d["pdbx_n_terminal_atom_flag"] == "Y"
+                ):
+                    n_term_atoms_assigned = True
+
+                if (
+                    "pdbx_c_terminal_atom_flag" in d
+                    and d["pdbx_c_terminal_atom_flag"] == "Y"
+                ):
+                    c_term_atoms_assigned = True
+
+            # Set error message
+            if num_backbone_atoms_assigned < 2:
+                error_message = (
+                    "WARNING - Fewer than 2 backbone items flagged in peptide CCD."
+                    " Check backbone and terminal atoms have been correctly assigned."
+                    "\n\n"
+                )
+
+            elif (not n_term_atoms_assigned) and (not c_term_atoms_assigned):
+                error_message = (
+                    "WARNING - Terminal atom flags have not been assigned for peptide "
+                    "CCD. Check terminal atoms have been correctly assigned.\n\n"
+                )
+
+            elif not n_term_atoms_assigned:
+                error_message = (
+                    "WARNING - N-terminal atom flag has not been assigned for peptide "
+                    "CCD. Check N-terminal atoms have been correctly assigned.\n\n"
+                )
+
+            elif not c_term_atoms_assigned:
+                error_message = (
+                    "WARNING - C-terminal atom flag has not been assigned for peptide "
+                    "CCD. Check C-terminal atoms have been correctly assigned.\n\n"
+                )
+
+        return error_message
 
     def __updateExistingValues(self, existingFile):
         """
