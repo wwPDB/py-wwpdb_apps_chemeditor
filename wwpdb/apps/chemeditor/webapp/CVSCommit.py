@@ -355,13 +355,13 @@ class CVSCommit(ChemEditorBase):
 
     def __checkPeptideBackboneAssigned(self):
         """Check peptide CCDs have expected backbone and terminal flags
-         
+
         For Peptide CCDs return error if they have:
           - <2 backbone atoms flagged as 'Y'
           - No N-terminal atoms flagged as 'Y'
           - No C-terminal atoms flagged as 'Y'
         """
-         
+
         peptide_types = [
             "L-PEPTIDE LINKING",
             "PEPTIDE-LIKE",
@@ -377,27 +377,29 @@ class CVSCommit(ChemEditorBase):
             "D-GAMMA-PEPTIDE, C-DELTA LINKING",
             "L-BETA-PEPTIDE, C-GAMMA LINKING",
         ]
-         
+
         error_message = ""
-         
+
+        if (not self.__sourceFile) or (not os.access(self.__sourceFile, os.R_OK)):
+            return "WARNING - Backbone check failed, CCD source file could not be read."
+
         cifObj = mmCIFUtil(filePath=self.__sourceFile)
-         
+
         # Set check to run only if peptide CCD
         ccd_pdbx_type = cifObj.GetSingleValue("chem_comp", "pdbx_type")
         ccd_type = cifObj.GetSingleValue("chem_comp", "type")
-         
+
         run_check = False
         if ccd_pdbx_type.upper() == "ATOMP":
             run_check = True
         elif ccd_type.upper() in peptide_types:
             run_check = True
-         
+
         if run_check:
-         
             num_backbone_atoms_assigned = 0
             n_term_atoms_assigned = False
             c_term_atoms_assigned = False
-         
+
             # Check backbone/terminal annotation
             chem_comp_atom = cifObj.GetValue("chem_comp_atom")
             for d in chem_comp_atom:
@@ -406,19 +408,19 @@ class CVSCommit(ChemEditorBase):
                     and d["pdbx_backbone_atom_flag"] == "Y"
                 ):
                     num_backbone_atoms_assigned += 1
-         
+
                 if (
                     "pdbx_n_terminal_atom_flag" in d
                     and d["pdbx_n_terminal_atom_flag"] == "Y"
                 ):
                     n_term_atoms_assigned = True
-         
+
                 if (
                     "pdbx_c_terminal_atom_flag" in d
                     and d["pdbx_c_terminal_atom_flag"] == "Y"
                 ):
                     c_term_atoms_assigned = True
-         
+
             # Set error message
             if num_backbone_atoms_assigned < 2:
                 error_message = (
@@ -426,25 +428,25 @@ class CVSCommit(ChemEditorBase):
                     " Check backbone and terminal atoms have been correctly assigned."
                     "\n\n"
                 )
-         
+
             elif (not n_term_atoms_assigned) and (not c_term_atoms_assigned):
                 error_message = (
                     "WARNING - Terminal atom flags have not been assigned for peptide "
                     "CCD. Check terminal atoms have been correctly assigned.\n\n"
                 )
-         
+
             elif not n_term_atoms_assigned:
                 error_message = (
                     "WARNING - N-terminal atom flag has not been assigned for peptide "
                     "CCD. Check N-terminal atoms have been correctly assigned.\n\n"
                 )
-         
+
             elif not c_term_atoms_assigned:
                 error_message = (
                     "WARNING - C-terminal atom flag has not been assigned for peptide "
                     "CCD. Check C-terminal atoms have been correctly assigned.\n\n"
                 )
-         
+
         return error_message
 
     def __updateExistingValues(self, existingFile):
