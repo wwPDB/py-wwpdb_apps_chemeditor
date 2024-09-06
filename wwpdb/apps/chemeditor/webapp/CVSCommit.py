@@ -2,6 +2,8 @@
 # File:  CVSCommit.py
 # Date:  05-Nov-2013
 # Updates:
+# 06-Sep-2024  zf replace ${CC_TOOLS}/checkComp with RcsbDpUtility's "annot-check-ccd-definition" operator 
+#
 ##
 """
 
@@ -31,6 +33,7 @@ from mmcif.io.PdbxReader import PdbxReader
 from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+from wwpdb.utils.dp.RcsbDpUtility import RcsbDpUtility
 
 
 class CVSCommit(ChemEditorBase):
@@ -38,6 +41,7 @@ class CVSCommit(ChemEditorBase):
     """
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         super(CVSCommit, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
+        self.__siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
         self.__templatePath = os.path.join(self._cI.get("SITE_WEB_APPS_TOP_PATH"), "htdocs", "chemeditor")
         self.__cif = None
         self.__id = None
@@ -74,7 +78,7 @@ class CVSCommit(ChemEditorBase):
                     if not message3:
                         message4 = self.__checkComp()
                         message5 = self.__checkDuplicate()
-                        messageBackboneError = self.__checkPeptideBackboneAssigned()
+                        #messageBackboneError = self.__checkPeptideBackboneAssigned()
                         if (
                             (not message4)
                             and (not message5)
@@ -192,6 +196,34 @@ class CVSCommit(ChemEditorBase):
         return message
 
     def __checkComp(self):
+        """ Run CCD definition checking
+        """
+        reportFilePath = os.path.join(self._sessionPath, self.__id + ".report")
+        self._removeFile(reportFilePath)
+        #
+        dp = RcsbDpUtility(tmpPath=self._sessionPath, siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
+        dp.imp(os.path.join(self._sessionPath, self.__id + ".cif"))
+#
+#       Allow to use system provided dataset file instead of default "annotation-pack/data/ascii/pcm_type_category_map.cif" file
+#       dp.addInput(name="pcm_support_file", value=system provided dataset file name)
+#
+        dp.op("annot-check-ccd-definition")
+        dp.exp(reportFilePath)
+        dp.cleanup()
+        #
+        message = ""
+        if os.access(reportFilePath, os.R_OK):
+            f = open(reportFilePath, "r")
+            data = f.read()
+            f.close()
+            if data:
+                message = data
+            #
+        #
+        return message
+
+    '''
+    def __checkCompOrg(self):
         """ Run dictionary checking
         """
         reportFilePath = os.path.join(self._sessionPath, self.__id + ".report")
@@ -224,6 +256,7 @@ class CVSCommit(ChemEditorBase):
             #
         #
         return message
+    '''
 
     def __checkDuplicate(self):
         """ Run duplicate checking
@@ -353,6 +386,7 @@ class CVSCommit(ChemEditorBase):
         #
         return errorMessage
 
+    '''
     def __checkPeptideBackboneAssigned(self):
         """Check peptide CCDs have expected backbone and terminal flags
 
@@ -448,6 +482,7 @@ class CVSCommit(ChemEditorBase):
                 )
 
         return error_message
+    '''
 
     def __updateExistingValues(self, existingFile):
         """
@@ -588,7 +623,6 @@ class CVSCommit(ChemEditorBase):
                 #
             #
             ok, text = self._cvsAdmin.commit(proj, rel_path)
-            ok = True
             if (not ok) and text:
                 textList.append(text)
             #
