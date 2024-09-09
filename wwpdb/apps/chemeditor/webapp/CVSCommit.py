@@ -207,6 +207,10 @@ class CVSCommit(ChemEditorBase):
 #       Allow to use system provided dataset file instead of default "annotation-pack/data/ascii/pcm_type_category_map.cif" file
 #       dp.addInput(name="pcm_support_file", value=system provided dataset file name)
 #
+        targetFile = os.path.join(self.__targetPath, self.__id + ".cif")
+        if os.access(targetFile, os.F_OK):
+            dp.addInput(name="set_stripped_down_flag", value="yes")
+        #
         dp.op("annot-check-ccd-definition")
         dp.exp(reportFilePath)
         dp.cleanup()
