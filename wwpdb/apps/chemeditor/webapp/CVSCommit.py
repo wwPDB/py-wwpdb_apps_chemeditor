@@ -3,6 +3,7 @@
 # Date:  05-Nov-2013
 # Updates:
 # 06-Sep-2024  zf replace ${CC_TOOLS}/checkComp with RcsbDpUtility's "annot-check-ccd-definition" operator 
+#                 added "begin_comment" & "end_comment" variables to control the "Continue commit to CVS" button
 #
 ##
 """
@@ -211,6 +212,7 @@ class CVSCommit(ChemEditorBase):
         if os.access(targetFile, os.F_OK):
             dp.addInput(name="set_stripped_down_flag", value="yes")
         #
+        dp.addInput(name="set_ok_flag", value="yes")
         dp.op("annot-check-ccd-definition")
         dp.exp(reportFilePath)
         dp.cleanup()
@@ -220,7 +222,7 @@ class CVSCommit(ChemEditorBase):
             f = open(reportFilePath, "r")
             data = f.read()
             f.close()
-            if data:
+            if data and (data.strip() != "Checking OK!"):
                 message = data
             #
         #
@@ -312,6 +314,8 @@ class CVSCommit(ChemEditorBase):
     def __writeError2(self, error1, error2, error3):
         """ Write error message html page
         """
+        begin_comment = ""
+        end_comment = ""
         errorlist = []
         if error1:
             lines = error1.split("\n")
@@ -319,6 +323,9 @@ class CVSCommit(ChemEditorBase):
                 s = line.strip()
                 if not s:
                     continue
+                #
+                begin_comment = "<!-- "
+                end_comment = " -->"
                 errorlist.append(s)
             #
         #
@@ -342,6 +349,9 @@ class CVSCommit(ChemEditorBase):
         myD["error"] = error_msg
         for item in ("newcodeflag", "instanceid", "parent_sessionid", "filesource", "identifier"):
             myD[item] = self._reqObj.getValue(item)
+        #
+        myD["begin_comment"] = begin_comment 
+        myD["end_comment"] = end_comment 
         #
         filePath = os.path.join(self._sessionPath, "error2.html")
         f = open(filePath, "w")
