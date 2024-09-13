@@ -206,11 +206,14 @@ class CVSCommit(ChemEditorBase):
         dp.imp(os.path.join(self._sessionPath, self.__id + ".cif"))
 #
 #       Allow to use system provided dataset file instead of default "annotation-pack/data/ascii/pcm_type_category_map.cif" file
+#
 #       dp.addInput(name="pcm_support_file", value=system provided dataset file name)
 #
-        targetFile = os.path.join(self.__targetPath, self.__id + ".cif")
-        if os.access(targetFile, os.F_OK):
-            dp.addInput(name="set_stripped_down_flag", value="yes")
+#       Check if CCD already existed and set "set_stripped_down_flag" flag
+#
+#       targetFile = os.path.join(self.__targetPath, self.__id + ".cif")
+#       if os.access(targetFile, os.F_OK):
+#           dp.addInput(name="set_stripped_down_flag", value="yes")
         #
         dp.addInput(name="set_ok_flag", value="yes")
         dp.op("annot-check-ccd-definition")
@@ -324,8 +327,10 @@ class CVSCommit(ChemEditorBase):
                 if not s:
                     continue
                 #
-                begin_comment = "<!-- "
-                end_comment = " -->"
+                if s.startswith("ERROR"):
+                    begin_comment = "<!-- "
+                    end_comment = " -->"
+                #
                 errorlist.append(s)
             #
         #
