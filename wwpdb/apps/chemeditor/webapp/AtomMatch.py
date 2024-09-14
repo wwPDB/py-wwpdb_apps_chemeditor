@@ -27,8 +27,8 @@ from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 
 
 class AtomMatch(ChemEditorBase):
-    """
-    """
+    """ """
+
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         super(AtomMatch, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         #
@@ -52,7 +52,7 @@ class AtomMatch(ChemEditorBase):
         self._removeFile(self.__matchResultPath)
         #
         cmd = "cd " + self._sessionPath + " ; " + self._annotBashSetting()
-        if reverse_flag == 'yes':
+        if reverse_flag == "yes":
             cmd += " ${BINPATH}/GetAtomMatch -first in.cif -second " + ccFilePath
         else:
             cmd += " ${BINPATH}/GetAtomMatch -first " + ccFilePath + " -second in.cif"
