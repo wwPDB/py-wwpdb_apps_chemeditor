@@ -32,6 +32,7 @@ from datetime import datetime
 from mmcif.api.DataCategory import DataCategory
 from mmcif.io.PdbxReader import PdbxReader
 from mmcif.io.PdbxWriter import PdbxWriter
+from wwpdb.apps.chemeditor.webapp.ChemCompDbUtil import ChemCompDbUtil
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 from wwpdb.utils.dp.RcsbDpUtility import RcsbDpUtility
@@ -44,6 +45,8 @@ class CVSCommit(ChemEditorBase):
         super(CVSCommit, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         self.__siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
         self.__templatePath = os.path.join(self._cI.get("SITE_WEB_APPS_TOP_PATH"), "htdocs", "chemeditor")
+        self.__siteName = self._cI.get("SITE_NAME")
+        #
         self.__cif = None
         self.__id = None
         self.__flag = None
@@ -268,32 +271,15 @@ class CVSCommit(ChemEditorBase):
     def __checkDuplicate(self):
         """ Run duplicate checking
         """
-        self._runMatchComp(self._sessionPath, self.__id + ".cif", self.__id + ".match", "'prefilter|strict|exact'")
+        duplicateList = self.__getDuplicatesFromMatchCompProgram()
+        if self.__siteName == "RCSB":
+            duplicateList.extend(self.__getDuplicatesFromCompv4Database())
         #
-        matchFilePath = os.path.join(self._sessionPath, self.__id + ".match")
-        if not os.access(matchFilePath, os.R_OK):
-            return ""
-        #
-        ifh = open(matchFilePath, "r")
-        data = ifh.read()
-        ifh.close()
-        #
-        if not data:
-            return ""
-        #
-        lines = data.split("\n")
-        matched_ids = []
-        if len(lines) > 1:
-            for line in lines[1:]:
-                records = line.split("\t")
-                if (len(records) > 4):
-                    matched_ids.append(records[4])
-                #
+        if len(duplicateList) > 0:
+            if len(duplicateList) > 1:
+                duplicateList = sorted(list(set(duplicateList)))
             #
-        #
-        if matched_ids:
-            message = "WARNING - " + self.__id + " matches " + ",".join(matched_ids)
-            return message
+            return "WARNING - " + self.__id + " matches " + ",".join(duplicateList)
         #
         return ""
 
@@ -310,7 +296,12 @@ class CVSCommit(ChemEditorBase):
             #
             self.__updateExistingValues(targetFile)
         #
-        return self.__cvsCommit(self.__id, self.__sourceFile)
+        retText = self.__cvsCommit(self.__id, self.__sourceFile)
+        if (self.__siteName == "RCSB") and (retText.find("CVS commit " + self.__id + " failed") == -1):
+            dbUtilObj = ChemCompDbUtil(reqObj=self._reqObj, verbose=self._verbose, log=self._lfh)
+            dbUtilObj.loadCCD(ccdFilePath=self.__sourceFile)
+        #
+        return retText
 
     def __writeError2(self, error1, error2, error3):
         """ Write error message html page
@@ -498,6 +489,41 @@ class CVSCommit(ChemEditorBase):
     #             )
 
     #     return error_message
+
+    def __getDuplicatesFromMatchCompProgram(self):
+        """ Get duplicate CCD list from /wwpdb_da/da_top/tools/packages/cc-tools-v2/bin/matchComp program
+        """
+        self._runMatchComp(self._sessionPath, self.__id + ".cif", self.__id + ".match", "'prefilter|strict|exact'")
+        #
+        matchFilePath = os.path.join(self._sessionPath, self.__id + ".match")
+        if not os.access(matchFilePath, os.R_OK):
+            return []
+        #
+        ifh = open(matchFilePath, "r")
+        data = ifh.read()
+        ifh.close()
+        #
+        if not data:
+            return ""
+        #
+        lines = data.split("\n")
+        matched_ids = []
+        if len(lines) > 1:
+            for line in lines[1:]:
+                records = line.split("\t")
+                if (len(records) > 4):
+                    matched_ids.append(records[4])
+                #
+            #
+        #
+        return matched_ids
+
+    def __getDuplicatesFromCompv4Database(self):
+        """ Get duplicate CCD list from compv4 database
+        """
+        dbUtilObj = ChemCompDbUtil(reqObj=self._reqObj, verbose=self._verbose, log=self._lfh)
+        duplicateList = dbUtilObj.searchSameCCDs(ccdFilePath=os.path.join(self._sessionPath, self.__id + ".cif"))
+        return duplicateList
 
     def __updateExistingValues(self, existingFile):
         """

@@ -43,9 +43,9 @@ class ChemEditorBase(object):
         self._sessionPath = None
         self._rltvSessionPath = None
         self.__siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
-        self._cI = ConfigInfo(self.__siteId)
-        self._cICommon = ConfigInfoAppCommon(self.__siteId)
-        self._cIAppCc = ConfigInfoAppCc(self.__siteId)
+        self._cI = ConfigInfo(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
+        self._cICommon = ConfigInfoAppCommon(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
+        self._cIAppCc = ConfigInfoAppCc(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
         self.__sbTopPath = self._cIAppCc.get_site_refdata_top_cvs_sb_path()  # "/wwpdb_da/da_top/reference/components"
         self._ccProjectName = self._cI.get("SITE_REFDATA_PROJ_NAME_CC")  # "ligand-dict-v3"
         self._crpi = ChemRefPathInfo(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)

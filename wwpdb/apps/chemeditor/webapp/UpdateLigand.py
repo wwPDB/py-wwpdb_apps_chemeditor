@@ -35,7 +35,7 @@ class UpdateLigand(ChemEditorBase):
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         super(UpdateLigand, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         #
-        self.__pdbId = str(self._reqObj.getValue("pdbid")).upper()
+        self.__pdbId = str(self._reqObj.getValue("pdbid"))
         self.__annotator = str(self._reqObj.getValue("annotator"))
         self.__processing_site = str(self._reqObj.getValue("processingsite"))
         if (not self.__processing_site) or (self.__processing_site == "null") or (self.__processing_site == "NULL"):
