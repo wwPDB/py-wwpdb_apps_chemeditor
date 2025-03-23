@@ -35,6 +35,8 @@ class Search(ChemEditorBase):
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         super(Search, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         #
+        self.__siteName = self._cI.get("SITE_NAME")
+        #
         self.__standardComponents = ("ALA", "ARG", "ASN", "ASP", "CYS", "GLU", "GLN", "GLY", "HIS", "ILE", "LEU", "LYS", "MET", "PHE",
                                      "PRO", "SER", "THR", "TRP", "TYR", "VAL", "A", "C", "G", "T", "U", "DA", "DC", "DG", "DT", "DU")
         #
@@ -60,7 +62,9 @@ class Search(ChemEditorBase):
             self.__runSearchScript("'prefilter|relaxed|skip-h|allowextra'")
             self.__runSearchScript("'prefilter|relaxed|skip-h|close'")
         #
-        self.__getDuplicatesFromCompv4Database(filePath)
+        if self.__siteName == "RCSB":
+            self.__getDuplicatesFromCompv4Database(filePath)
+        #
 
     def __runSearchScript(self, option):
         self._runMatchComp(self._sessionPath, "in.cif", "search_result", option)
