@@ -24,6 +24,7 @@ import os
 import sys
 from operator import itemgetter
 
+from wwpdb.apps.chemeditor.webapp.ChemCompDbUtil import ChemCompDbUtil
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 
@@ -59,10 +60,31 @@ class Search(ChemEditorBase):
             self.__runSearchScript("'prefilter|relaxed|skip-h|allowextra'")
             self.__runSearchScript("'prefilter|relaxed|skip-h|close'")
         #
+        self.__getDuplicatesFromCompv4Database(filePath)
 
     def __runSearchScript(self, option):
         self._runMatchComp(self._sessionPath, "in.cif", "search_result", option)
         self.__parseSearchResult()
+
+    def __getDuplicatesFromCompv4Database(self, filePath):
+        """ Get duplicate CCD list from compv4 database
+        """
+        dbUtilObj = ChemCompDbUtil(reqObj=self._reqObj, verbose=self._verbose, log=self._lfh)
+        duplicateList = dbUtilObj.searchSameCCDs(ccdFilePath=filePath)
+        if len(duplicateList) == 0:
+            return
+        #
+        for ccId in duplicateList:
+            if ccId in self.__idMap:
+                continue
+            #
+            self.__idMap[ccId] = "yes"
+            standard = 1
+            if ccId in self.__standardComponents:
+                standard = 0
+            #
+            self.__idList.append((ccId, 0, standard))
+        #
 
     def __parseSearchResult(self):
         filePath = os.path.join(self._sessionPath, "search_result")
