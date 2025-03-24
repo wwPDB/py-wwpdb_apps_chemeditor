@@ -11,13 +11,16 @@ __email__ = "zfeng@rcsb.rutgers.edu"
 __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.07"
 
-import os,sys,traceback
+import os
+import sys
+import traceback
 
 from mmcif.io.IoAdapterCore import IoAdapterCore
 from wwpdb.utils.db.ChemCompSchemaDef import ChemCompSchemaDef
 from wwpdb.utils.db.MyConnectionBase import MyConnectionBase
 from wwpdb.utils.db.MyDbUtil import MyDbQuery
 from wwpdb.utils.db.SchemaDefLoader import SchemaDefLoader
+
 
 class ChemCompDbUtil(MyConnectionBase):
     """ Wrapper for utilities for database loading of chemical reference data
@@ -30,7 +33,7 @@ class ChemCompDbUtil(MyConnectionBase):
         #
         self.__verbose = verbose
         self.__lfh = log
-        self.__debug = verbose
+        # self.__debug = verbose
         #
         self.__sObj = self.__reqObj.newSessionObj()
         self.__sessionPath = self.__sObj.getPath()
@@ -51,9 +54,9 @@ class ChemCompDbUtil(MyConnectionBase):
         try:
             ok = self.openConnection()
             if ok:
-                sdl = SchemaDefLoader(schemaDefObj=ChemCompSchemaDef(), ioObj=self.__ioObj, dbCon=self._dbCon, workPath=self.__sessionPath, \
+                sdl = SchemaDefLoader(schemaDefObj=ChemCompSchemaDef(), ioObj=self.__ioObj, dbCon=self._dbCon, workPath=self.__sessionPath,
                                       cleanUp=False, warnings="error", verbose=self.__verbose, log=self.__lfh)
-                ok = sdl.load(inputPathList=[ ccdFilePath ], loadType="batch-insert", deleteOpt="selected")
+                ok = sdl.load(inputPathList=[ccdFilePath], loadType="batch-insert", deleteOpt="selected")
                 self.closeConnection()
             else:
                 if self.__verbose:
@@ -92,7 +95,7 @@ class ChemCompDbUtil(MyConnectionBase):
             checkValueLists = []
             for descriptorRow in descriptorRowList:
                 valueList = []
-                for item in ( "type", "program", "descriptor" ):
+                for item in ("type", "program", "descriptor"):
                     if (item not in descriptorRow) or (not descriptorRow[item]):
                         continue
                     #
@@ -103,7 +106,7 @@ class ChemCompDbUtil(MyConnectionBase):
                 #
                 if ((valueList[0] == "SMILES_CANONICAL") and ((valueList[1] == "CACTVS") or (valueList[1] == "OpenEye OEToolkits"))) or\
                    ((valueList[0] == "InChI") and (valueList[1] == "InChI")):
-                     checkValueLists.append(valueList)
+                    checkValueLists.append(valueList)
                 #
             #
             if len(checkValueLists) < 3:
@@ -116,9 +119,9 @@ class ChemCompDbUtil(MyConnectionBase):
                 ccdIdList = self.__searchDuplicateIdList(myq, checkValueLists[0])
                 if len(ccdIdList) > 0:
                     for valueList in checkValueLists[1:]:
-                        ccdIdList1 = self.__searchDuplicateIdList(myq, valueList);
+                        ccdIdList1 = self.__searchDuplicateIdList(myq, valueList)
                         if len(ccdIdList1) > 0:
-                           ccdIdList = list(set(ccdIdList).intersection(ccdIdList1))
+                            ccdIdList = list(set(ccdIdList).intersection(ccdIdList1))
                         else:
                             ccdIdList = []
                         #
