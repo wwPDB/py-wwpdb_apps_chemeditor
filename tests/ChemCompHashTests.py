@@ -13,13 +13,41 @@ __license__ = "Creative Commons Attribution 3.0 Unported"
 __version__ = "V0.01"
 
 import unittest
+
 from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
 
 
 class HashTests(unittest.TestCase):
     def setUp(self):
         self.__sites = ["RCSB", "PDBJ", "PDBE"]
-        self.characters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+        self.characters = [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+        ]
         self.numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
     def testSomeHash(self):
@@ -40,7 +68,9 @@ class HashTests(unittest.TestCase):
         for i in allchars:
             for j in allchars:
                 for k in allchars:
-                    self.assertIn(cch.getChemCompIdSite("%s%s%s" % (i, j, k)), self.__sites, "Generated id not in sites")
+                    self.assertIn(
+                        cch.getChemCompIdSite("%s%s%s" % (i, j, k)), self.__sites, "Generated id not in sites"
+                    )
 
 
 if __name__ == "__main__":

@@ -4,9 +4,12 @@ from wwpdb.apps.chemeditor.webapp.Utils import setupLog
 from wwpdb.utils.db.MyConnectionBase import MyConnectionBase
 
 
-class DaInternalCombineDb(object):
-    def __init__(self, siteId=None, verbose=False, log=sys.stderr):
+class ConnectError(Exception):
+    """Raised when cannot connect to the database"""
 
+
+class DaInternalCombineDb:
+    def __init__(self, siteId=None, verbose=False, log=sys.stderr):
         self._mydb = None
         self._siteId = siteId
         self.logger = setupLog(verbose, log)
@@ -34,7 +37,8 @@ class DaInternalCombineDb(object):
 
         if not ok:
             self._mydb = None
-            raise Exception("Error opening connection to DA_INTERNAL_COMBINE")  # pylint: disable=broad-exception-raised
+            msg = "Error opening connection to DA_INTERNAL_COMBINE"
+            raise ConnectError(msg)
 
         return True
 
@@ -60,7 +64,8 @@ class DaInternalCombineDb(object):
         depIds = []
 
         if self._mydb is None:
-            raise Exception("Error opening connection to database")  # pylint: disable=broad-exception-raised
+            msg = "Error opening connection to database"
+            raise ConnectError(msg)
 
         cursor = self._mydb.getCursor()
         cursor.execute(query, (ccId,))

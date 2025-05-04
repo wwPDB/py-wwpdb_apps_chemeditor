@@ -1,9 +1,10 @@
 import os
-import sys
 import os.path
+import sys
 import tempfile
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
+
 from wwpdb.apps.chemeditor.webapp.DaInternalCombineDb import DaInternalCombineDb
 
 sessionsTopDir = tempfile.mkdtemp()

@@ -1,10 +1,10 @@
 import json
-import tempfile
-import sys
-import unittest
 import os
 import os.path
-from unittest.mock import Mock, MagicMock, patch
+import sys
+import tempfile
+import unittest
+from unittest.mock import MagicMock, Mock, patch
 
 sessionsTopDir = tempfile.mkdtemp()
 refdir = tempfile.TemporaryDirectory()
@@ -53,13 +53,13 @@ class ChemEditorWebAppTests(unittest.TestCase):
         self._reqObj.setValue("ccid", "AAA")
 
         cewa = ChemEditorWebAppWorker(self._reqObj, self._verbose, self._lfh)
-        response = json.loads(cewa._getEntriesWithLigands().get()["RETURN_STRING"])  # pylint: disable=protected-access
+        response = json.loads(cewa._getEntriesWithLigands().get()["RETURN_STRING"])  # noqa: SLF001 pylint: disable=protected-access
         self.assertEqual(response["datacontent"], ["D_800001"])
 
         # Context (not used)
         # mockDb().return_value.__enter__.return_value.getEntriesWithLigand.side_effect = IOError('failed to connect to db')
         # Generic
-        mockDb().getEntriesWithLigand.side_effect = IOError("failed to connect to db")
+        mockDb().getEntriesWithLigand.side_effect = OSError("failed to connect to db")
 
         self._reqObj.setValue("request_path", "/service/chemeditor/get_entries_with_ligand")
         response = json.loads(cewa.doOp().get()["RETURN_STRING"])
