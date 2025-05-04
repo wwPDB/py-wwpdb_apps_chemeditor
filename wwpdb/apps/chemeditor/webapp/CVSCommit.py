@@ -17,6 +17,7 @@ This software is provided under a Creative Commons Attribution 3.0 Unported
 License described at http://creativecommons.org/licenses/by/3.0/.
 
 """
+
 __docformat__ = "restructuredtext en"
 __author__ = "Zukang Feng"
 __email__ = "zfeng@rcsb.rutgers.edu"
@@ -32,6 +33,7 @@ from datetime import datetime
 from mmcif.api.DataCategory import DataCategory
 from mmcif.io.PdbxReader import PdbxReader
 from mmcif.io.PdbxWriter import PdbxWriter
+
 from wwpdb.apps.chemeditor.webapp.ChemCompDbUtil import ChemCompDbUtil
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
@@ -39,30 +41,125 @@ from wwpdb.utils.dp.RcsbDpUtility import RcsbDpUtility
 
 
 class CVSCommit(ChemEditorBase):
-    """  Class handle CVS commit to chemical component dictionary
-    """
+    """Class handle CVS commit to chemical component dictionary"""
+
     def __init__(self, reqObj=None, verbose=False, log=sys.stderr):
         super(CVSCommit, self).__init__(reqObj=reqObj, verbose=verbose, log=log)
         self.__siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
         self.__templatePath = os.path.join(self._cI.get("SITE_WEB_APPS_TOP_PATH"), "htdocs", "chemeditor")
         self.__siteName = self._cI.get("SITE_NAME")
-        #
         self.__cif = None
         self.__id = None
         self.__flag = None
         self.__sourceFile = None
-        self.__reservedIdList = ["DRG", "INH", "LIG", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15",
-                                 "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35",
-                                 "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55",
-                                 "56", "57", "58", "59", "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75",
-                                 "76", "77", "78", "79", "80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95",
-                                 "96", "97", "98", "99"]
-        #
+        self.__reservedIdList = [
+            "DRG",
+            "INH",
+            "LIG",
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "31",
+            "32",
+            "33",
+            "34",
+            "35",
+            "36",
+            "37",
+            "38",
+            "39",
+            "40",
+            "41",
+            "42",
+            "43",
+            "44",
+            "45",
+            "46",
+            "47",
+            "48",
+            "49",
+            "50",
+            "51",
+            "52",
+            "53",
+            "54",
+            "55",
+            "56",
+            "57",
+            "58",
+            "59",
+            "60",
+            "61",
+            "62",
+            "63",
+            "64",
+            "65",
+            "66",
+            "67",
+            "68",
+            "69",
+            "70",
+            "71",
+            "72",
+            "73",
+            "74",
+            "75",
+            "76",
+            "77",
+            "78",
+            "79",
+            "80",
+            "81",
+            "82",
+            "83",
+            "84",
+            "85",
+            "86",
+            "87",
+            "88",
+            "89",
+            "90",
+            "91",
+            "92",
+            "93",
+            "94",
+            "95",
+            "96",
+            "97",
+            "98",
+            "99",
+        ]
         self.__getData()
 
     def commit(self):
-        """  Do CVS commit
-        """
+        """Do CVS commit"""
         message1 = self.__checkIDExisted()
         message2 = ""
         message3 = ""
@@ -71,7 +168,6 @@ class CVSCommit(ChemEditorBase):
         messageBackboneError = ""
         message6 = ""
         message7 = ""
-        #
         if not message1:
             if self.__flag:
                 message6 = self.__commitCVS()
@@ -83,21 +179,10 @@ class CVSCommit(ChemEditorBase):
                         message4 = self.__checkComp()
                         message5 = self.__checkDuplicate()
                         # messageBackboneError = self.__checkPeptideBackboneAssigned()
-                        if (
-                            (not message4)
-                            and (not message5)
-                            and (not messageBackboneError)
-                        ):
+                        if (not message4) and (not message5) and (not messageBackboneError):
                             message6 = self.__commitCVS()
-                        #
-                    #
                 if message4 or message5 or messageBackboneError:
-                    message7 = self.__writeError2(
-                        message4, message5, messageBackboneError
-                    )
-                #
-            #
-        #
+                    message7 = self.__writeError2(message4, message5, messageBackboneError)
         __cD = {}
         if message1 or message2 or message6:
             __cD["errorflag"] = True
@@ -118,69 +203,63 @@ class CVSCommit(ChemEditorBase):
         return __cD
 
     def __getData(self):
-        """ Get input data
-        """
+        """Get input data"""
         self.__id = str(self._reqObj.getValue("id"))
         self.__cif = self._reqObj.getValue("cif")
         self.__flag = self._reqObj.getValue("force")
         self.__existingFlag = self._reqObj.getValue("existflag")
-        #
         if not self.__id:
             return
-        #
         self.getSandBoxFilePath(self.__id)
         self.__sourceFile = os.path.join(self._sessionPath, self.__id + ".cif")
         self.__targetPath = self._crpi.getFileDir(self.__id, "CC")
 
     def __checkIDExisted(self):
-        """ Check if Ligand ID exists
-        """
+        """Check if Ligand ID exists"""
         if not self.__targetPath:
             return "CVS commit failed"
-        #
         if self.__id.upper() in self.__reservedIdList:
             return "Ligand ID '" + self.__id + "' is a reserved ligand code."
-        #
         return ""
 
     def __saveData(self):
-        """ Save chemical component cif file
-        """
+        """Save chemical component cif file"""
         if self.__flag:
             if (not self.__sourceFile) or (not os.access(self.__sourceFile, os.R_OK)):
                 return "CVS commit failed"
-            #
             return ""
-        #
         if (not self.__sourceFile) or (not self.__cif):
             return "CVS commit failed"
-        #
         f = open(self.__sourceFile, "w")
         f.write(self.__cif + "\n")
         f.close()
         if not os.access(self.__sourceFile, os.R_OK):
             return "CVS commit failed"
-        #
         return ""
 
     def __checkSynTaxError(self):
-        """ Run syntax checking
-        """
+        """Run syntax checking"""
         logFilePath = os.path.join(self._sessionPath, "precheckComp.log")
         self._removeFile(logFilePath)
-        #
-        cmd = "cd " + self._sessionPath + " ; " + self._annotBashSetting() + " ${BINPATH}/precheckComp -i " + self.__id \
-            + ".cif -id " + self.__id + " -o precheckComp.log > _precheckComp_log 2>&1 ; "
+        cmd = (
+            "cd "
+            + self._sessionPath
+            + " ; "
+            + self._annotBashSetting()
+            + " ${BINPATH}/precheckComp -i "
+            + self.__id
+            + ".cif -id "
+            + self.__id
+            + " -o precheckComp.log > _precheckComp_log 2>&1 ; "
+        )
         self._runCmd(cmd)
-        #
         message = ""
         if os.access(logFilePath, os.R_OK):
-            f = open(logFilePath, "r")
+            f = open(logFilePath)
             data = f.read()
             f.close()
             if (not data) or (not data.startswith("Syntax error:")):
                 data += self.__checkParentCompId_and_updateSynonyms(not data)
-            #
             if data:
                 message = "yes"
                 filePath = os.path.join(self._sessionPath, "error1.html")
@@ -195,43 +274,35 @@ class CVSCommit(ChemEditorBase):
                 f.write("</body>\n")
                 f.write("</html>\n")
                 f.close()
-            #
-        #
         return message
 
     def __checkComp(self):
-        """ Run CCD definition checking
-        """
+        """Run CCD definition checking"""
         reportFilePath = os.path.join(self._sessionPath, self.__id + ".report")
         self._removeFile(reportFilePath)
-        #
         dp = RcsbDpUtility(tmpPath=self._sessionPath, siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
         dp.imp(os.path.join(self._sessionPath, self.__id + ".cif"))
-#
-#       Allow to use system provided dataset file instead of default "annotation-pack/data/ascii/pcm_type_category_map.cif" file
-#
-#       dp.addInput(name="pcm_support_file", value=system provided dataset file name)
-#
-#       Check if CCD already existed and set "set_stripped_down_flag" flag
-#
-#       targetFile = os.path.join(self.__targetPath, self.__id + ".cif")
-#       if os.access(targetFile, os.F_OK):
-#           dp.addInput(name="set_stripped_down_flag", value="yes")
         #
+        #       Allow to use system provided dataset file instead of default "annotation-pack/data/ascii/pcm_type_category_map.cif" file
+        #
+        #       dp.addInput(name="pcm_support_file", value=system provided dataset file name)
+        #
+        #       Check if CCD already existed and set "set_stripped_down_flag" flag
+        #
+        #       targetFile = os.path.join(self.__targetPath, self.__id + ".cif")
+        #       if os.access(targetFile, os.F_OK):
+        #           dp.addInput(name="set_stripped_down_flag", value="yes")
         dp.addInput(name="set_ok_flag", value="yes")
         dp.op("annot-check-ccd-definition")
         dp.exp(reportFilePath)
         dp.cleanup()
-        #
         message = ""
         if os.access(reportFilePath, os.R_OK):
-            f = open(reportFilePath, "r")
+            f = open(reportFilePath)
             data = f.read()
             f.close()
             if data and (data.strip() != "Checking OK!"):
                 message = data
-            #
-        #
         return message
 
     # def __checkCompOrg(self):
@@ -269,43 +340,33 @@ class CVSCommit(ChemEditorBase):
     #     return message
 
     def __checkDuplicate(self):
-        """ Run duplicate checking
-        """
+        """Run duplicate checking"""
         duplicateList = self.__getDuplicatesFromMatchCompProgram()
         if self.__siteName == "RCSB":
             duplicateList.extend(self.__getDuplicatesFromCompv4Database())
-        #
         if len(duplicateList) > 0:
             if len(duplicateList) > 1:
-                duplicateList = sorted(list(set(duplicateList)))
-            #
+                duplicateList = sorted(list(set(duplicateList)))  # noqa: C414
             return "WARNING - " + self.__id + " matches " + ",".join(duplicateList)
-        #
         return ""
 
     def __commitCVS(self):
-        """ Run CVS check-in
-        """
+        """Run CVS check-in"""
         if (not self.__sourceFile) or (not os.access(self.__sourceFile, os.R_OK)):
             return "CVS commit failed"
-        #
         targetFile = os.path.join(self.__targetPath, self.__id + ".cif")
         if os.access(self.__targetPath, os.F_OK):
             if not os.access(targetFile, os.R_OK):
                 return self.__targetPath + " exists. But " + targetFile + " does not exist. CVS commit failed."
-            #
             self.__updateExistingValues(targetFile)
-        #
         retText = self.__cvsCommit(self.__id, self.__sourceFile)
         if (self.__siteName == "RCSB") and (retText.find("CVS commit " + self.__id + " failed") == -1):
             dbUtilObj = ChemCompDbUtil(reqObj=self._reqObj, verbose=self._verbose, log=self._lfh)
             dbUtilObj.loadCCD(ccdFilePath=self.__sourceFile)
-        #
         return retText
 
     def __writeError2(self, error1, error2, error3):
-        """ Write error message html page
-        """
+        """Write error message html page"""
         begin_comment = ""
         end_comment = ""
         errorlist = []
@@ -315,27 +376,19 @@ class CVSCommit(ChemEditorBase):
                 s = line.strip()
                 if not s:
                     continue
-                #
                 if s.startswith("ERROR"):
                     begin_comment = "<!-- "
                     end_comment = " -->"
-                #
                 errorlist.append(s)
-            #
-        #
         if error2:
             errorlist.append(error2)
-        #
         if error3:
             errorlist.append(error3)
-        #
         if not errorlist:
             return ""
-        #
         error_msg = ""
         for error in errorlist:
             error_msg += "<li>" + error + "</li>\n"
-        #
         myD = {}
         myD["id"] = self.__id
         myD["sessionid"] = self._sessionId
@@ -343,10 +396,8 @@ class CVSCommit(ChemEditorBase):
         myD["error"] = error_msg
         for item in ("newcodeflag", "instanceid", "parent_sessionid", "filesource", "identifier"):
             myD[item] = self._reqObj.getValue(item)
-        #
         myD["begin_comment"] = begin_comment
         myD["end_comment"] = end_comment
-        #
         filePath = os.path.join(self._sessionPath, "error2.html")
         f = open(filePath, "w")
         f.write(self.__processTemplate("cvs_commit_tmplt.html", myD) + "\n")
@@ -354,10 +405,8 @@ class CVSCommit(ChemEditorBase):
         return "yes"
 
     def __checkParentCompId_and_updateSynonyms(self, noErrorFlag):
-        """
-        """
+        """ """
         cifObj = mmCIFUtil(filePath=self.__sourceFile)
-        #
         synonyms = ""
         synonymList = cifObj.GetValue("pdbx_chem_comp_synonyms")
         if synonymList:
@@ -365,33 +414,30 @@ class CVSCommit(ChemEditorBase):
             for dic in synonymList:
                 if ("name" not in dic) or (not dic["name"]) or (dic["name"] in uniqueList):
                     continue
-                #
                 uniqueList.append(dic["name"])
                 if synonyms:
                     synonyms += "; "
-                #
                 synonyms += dic["name"]
-            #
-        #
         errorMessage = ""
         parent_comp_ids = cifObj.GetSingleValue("chem_comp", "mon_nstd_parent_comp_id")
         if parent_comp_ids:
-            comp_ids = parent_comp_ids.replace("\n\r", " ").replace("\n", " ").replace("\r", " ").replace(";", " ").replace(",", " ")
+            comp_ids = (
+                parent_comp_ids.replace("\n\r", " ")
+                .replace("\n", " ")
+                .replace("\r", " ")
+                .replace(";", " ")
+                .replace(",", " ")
+            )
             for comp_id in comp_ids.split(" "):
                 if not comp_id:
                     continue
-                #
                 targetFile = self._crpi.getFilePath(comp_id, "CC")
                 if (not targetFile) or (not os.access(targetFile, os.F_OK)):
                     errorMessage = "Incorrect parent compId: '" + parent_comp_ids + "'.\n\n"
                     break
-                #
-            #
-        #
         if noErrorFlag and synonyms and (not errorMessage):
             cifObj.UpdateSingleRowValue("chem_comp", "pdbx_synonyms", 0, synonyms)
             cifObj.WriteCif(outputFilePath=self.__sourceFile)
-        #
         return errorMessage
 
     # def __checkPeptideBackboneAssigned(self):
@@ -491,69 +537,53 @@ class CVSCommit(ChemEditorBase):
     #     return error_message
 
     def __getDuplicatesFromMatchCompProgram(self):
-        """ Get duplicate CCD list from /wwpdb_da/da_top/tools/packages/cc-tools-v2/bin/matchComp program
-        """
+        """Get duplicate CCD list from /wwpdb_da/da_top/tools/packages/cc-tools-v2/bin/matchComp program"""
         self._runMatchComp(self._sessionPath, self.__id + ".cif", self.__id + ".match", "'prefilter|strict|exact'")
-        #
         matchFilePath = os.path.join(self._sessionPath, self.__id + ".match")
         if not os.access(matchFilePath, os.R_OK):
             return []
-        #
-        ifh = open(matchFilePath, "r")
+        ifh = open(matchFilePath)
         data = ifh.read()
         ifh.close()
-        #
         if not data:
             return ""
-        #
         lines = data.split("\n")
         matched_ids = []
         if len(lines) > 1:
             for line in lines[1:]:
                 records = line.split("\t")
-                if (len(records) > 4):
+                if len(records) > 4:
                     matched_ids.append(records[4])
-                #
-            #
-        #
         return matched_ids
 
     def __getDuplicatesFromCompv4Database(self):
-        """ Get duplicate CCD list from compv4 database
-        """
+        """Get duplicate CCD list from compv4 database"""
         dbUtilObj = ChemCompDbUtil(reqObj=self._reqObj, verbose=self._verbose, log=self._lfh)
         duplicateList = dbUtilObj.searchSameCCDs(ccdFilePath=os.path.join(self._sessionPath, self.__id + ".cif"))
         return duplicateList
 
     def __updateExistingValues(self, existingFile):
-        """
-        """
+        """ """
         if self.__existingFlag == "yes":
             return
-        #
         cifObj = mmCIFUtil(filePath=existingFile)
-        #
         myDataList = []
-        ifh = open(self.__sourceFile, "r")
+        ifh = open(self.__sourceFile)
         pRd = PdbxReader(ifh)
         pRd.read(myDataList)
         ifh.close()
-        #
         myBlock = myDataList[0]
         compCat = myBlock.getObj("chem_comp")
         for item in ("pdbx_initial_date", "pdbx_release_status", "pdbx_replaced_by", "pdbx_replaces"):
             val = cifObj.GetSingleValue("chem_comp", item)
             if val:
                 compCat.setValue(val, item, 0)
-            #
-        #
         existing_audits = cifObj.GetValue("pdbx_chem_comp_audit")
         if existing_audits:
             items = ["comp_id", "action_type", "date", "processing_site", "annotator", "details"]
             newAuditCat = DataCategory("pdbx_chem_comp_audit")
             for item in items:
                 newAuditCat.appendAttribute(item)
-            #
             uniqueList = []
             row = 0
             for auditDict in existing_audits:
@@ -561,80 +591,55 @@ class CVSCommit(ChemEditorBase):
                 for item in items:
                     if item not in auditDict:
                         continue
-                    #
                     if uniqueValue:
                         uniqueValue += "|"
-                    #
                     uniqueValue += auditDict[item]
-                #
                 if uniqueValue in uniqueList:
                     continue
-                #
                 uniqueList.append(uniqueValue)
-                #
                 for item in items:
                     if item in auditDict:
                         newAuditCat.setValue(auditDict[item], item, row)
-                    #
-                #
                 row += 1
-            #
             auditCat = myBlock.getObj("pdbx_chem_comp_audit")
             if auditCat:
-                today = datetime.today().strftime("%Y-%m-%d")
+                today = datetime.today().strftime("%Y-%m-%d")  # noqa: DTZ002   # naive ok here
                 iList = auditCat.getAttributeList()
                 for rowDic in auditCat.getRowList():
                     auditDict = {}
                     for idxIt, itName in enumerate(iList):
-                        if rowDic[idxIt] != '?' and rowDic[idxIt] != '.':
+                        if rowDic[idxIt] != "?" and rowDic[idxIt] != ".":
                             auditDict[itName] = rowDic[idxIt]
-                        #
-                    #
                     if not auditDict:
                         continue
-                    #
                     if ("date" not in auditDict) or (auditDict["date"] != today):
                         continue
-                    #
                     if ("action_type" not in auditDict) or (auditDict["action_type"] == "Create component"):
                         continue
-                    #
                     uniqueValue = ""
                     for item in items:
                         if item not in auditDict:
                             continue
-                        #
                         if uniqueValue:
                             uniqueValue += "|"
-                        #
                         uniqueValue += auditDict[item]
-                    #
                     if uniqueValue in uniqueList:
                         continue
-                    #
                     uniqueList.append(uniqueValue)
-                    #
                     for item in items:
                         if item in auditDict:
                             newAuditCat.setValue(auditDict[item], item, row)
-                        #
-                    #
                     row += 1
-                #
-            #
             myBlock.replace(newAuditCat)
-        #
         ofh = open(self.__sourceFile, "w")
         pdbxW = PdbxWriter(ofh)
         pdbxW.write(myDataList)
         ofh.close()
 
     def __cvsCommit(self, ccId, sourceFilePath):
-        """ Run CVS commit
-        """
+        """Run CVS commit"""
         if (not sourceFilePath) or (not os.access(sourceFilePath, os.R_OK)):
             return "CVS commit failed - Cannot update nonexistent file"
-        #
         targetFile = self.getSandBoxFilePath(ccId)
         textList = []
 
@@ -650,53 +655,44 @@ class CVSCommit(ChemEditorBase):
             else:
                 dstPath = self._crpi.getFileDir(ccId, "CC")
                 targetFile = self._crpi.getFilePath(ccId, "CC")
-                if (not os.access(dstPath, os.F_OK)):
+                if not os.access(dstPath, os.F_OK):
                     os.makedirs(dstPath)
                     ok, text = self._cvsAdmin.add(proj, relDir)
                     if (not ok) and text:
                         textList.append(text)
-                    #
-                #
                 shutil.copy2(sourceFilePath, targetFile)
                 ok, text = self._cvsAdmin.add(proj, rel_path)
                 if (not ok) and text:
                     textList.append(text)
-                #
-            #
             ok, text = self._cvsAdmin.commit(proj, rel_path)
             if (not ok) and text:
                 textList.append(text)
-            #
         except:  # noqa: E722 pylint: disable=bare-except
             textList.append("CVS commit failed - CVS update exception")
             traceback.print_exc(file=self._lfh)
-        #
         self._cvsAdmin.cleanup()
-        #
         if not os.access(targetFile, os.R_OK):
             textList.append("CVS commit " + ccId + " failed")
-        #
         if textList:
             return "\n".join(textList)
-        #
         return ""
 
     def __processTemplate(self, fn, parameterDict=None):
-        """ Read the input HTML template data file and perform the key/value substitutions in the
-            input parameter dictionary.
+        """Read the input HTML template data file and perform the key/value substitutions in the
+        input parameter dictionary.
 
-            :Params:
-                ``parameterDict``: dictionary where
-                key = name of subsitution placeholder in the template and
-                value = data to be used to substitute information for the placeholder
+        :Params:
+            ``parameterDict``: dictionary where
+            key = name of subsitution placeholder in the template and
+            value = data to be used to substitute information for the placeholder
 
-            :Returns:
-                string representing entirety of content with subsitution placeholders now replaced with data
+        :Returns:
+            string representing entirety of content with subsitution placeholders now replaced with data
         """
         if parameterDict is None:
             parameterDict = {}
         fPath = os.path.join(self.__templatePath, fn)
-        ifh = open(fPath, "r")
+        ifh = open(fPath)
         sIn = ifh.read()
         ifh.close()
-        return (sIn % parameterDict)
+        return sIn % parameterDict

@@ -1,6 +1,6 @@
-from logging import getLogger, StreamHandler, Formatter, DEBUG, INFO
+from logging import DEBUG, INFO, Formatter, StreamHandler, getLogger
 
-HANDLER_NAME = 'stream_handler'
+HANDLER_NAME = "stream_handler"
 
 
 def setupLog(verbose, log_file):
@@ -24,7 +24,7 @@ def setupLog(verbose, log_file):
     handler = StreamHandler(log_file)
     handler.set_name(HANDLER_NAME)
 
-    formatter = Formatter('+%(module)s.%(funcName)s() ++ %(message)s\n')
+    formatter = Formatter("+%(module)s.%(funcName)s() ++ %(message)s\n")
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
