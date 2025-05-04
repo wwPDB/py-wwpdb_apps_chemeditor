@@ -177,8 +177,6 @@ jobs:
     - ${{ if startsWith(parameters.tox, 'py') }}:
       - script: pip install --upgrade pip twine build wheel
         displayName: "Acquire build tools"
-      - script: python setup.py  sdist --dist-dir "$(System.DefaultWorkingDirectory)/dist"
-        displayName: "Build source dist"
       - script: python -m build --outdir "$(System.DefaultWorkingDirectory)/dist"
         displayName: "Build source distributions"
       #
