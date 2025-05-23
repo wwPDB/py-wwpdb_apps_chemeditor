@@ -239,7 +239,7 @@ class ChemEditorBase:
             + self._ccToolsBashSetting()
             + " ${CC_TOOLS}/annotateComp -vv -i "
             + inFile
-            + " -op 'stereo-cactvs|aro-cactvs|descriptor-oe|descriptor-cactvs|descriptor-inchi|name-oe|name-acd|xyz-ideal-corina|xyz-model-h-oe|rename|fix' "
+            + " -op 'stereo-cactvs|aro-cactvs|descriptor-oe|descriptor-cactvs|descriptor-inchi|name-oe|name-acd|xyz-ideal-corina|xyz-model-h-oe|fix' "
             + " -o "
             + outFile
             + " > _comp_log 2>&1 ; "
