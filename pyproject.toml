@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "wwpdb.apps.ccmodule >= 0.4",
-    "wwpdb.io ~= 0.34",
+    "wwpdb.io >= 0.34",
     "wwpdb.utils.config ~= 0.34",
     "wwpdb.utils.db",
     "wwpdb.utils.session",
