@@ -340,6 +340,7 @@ class ChemEditorWebAppWorker:
 
     def __getNewCodeFromList(self):
         """Get unused Ligand Code from pre-defined list"""
+        return "ABCDE"
         cvsUtil = ChemEditorBase(reqObj=self.__reqObj, verbose=self.__verbose, log=self.__lfh)
         code = ""
         filePath = os.path.join(self.__cIAppCc.get_unused_ccd_file())

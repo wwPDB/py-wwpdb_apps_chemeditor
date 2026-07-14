@@ -28,6 +28,7 @@ from wwpdb.io.cvs.CvsAdmin import CvsSandBoxAdmin
 from wwpdb.io.locator.ChemRefPathInfo import ChemRefPathInfo
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
 from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCc, ConfigInfoAppCommon
+from wwpdb.utils.dp.RcsbDpUtility import RcsbDpUtility
 
 
 class ChemEditorBase:
@@ -41,13 +42,13 @@ class ChemEditorBase:
         self._sessionId = None
         self._sessionPath = None
         self._rltvSessionPath = None
-        self.__siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
-        self._cI = ConfigInfo(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
-        self._cICommon = ConfigInfoAppCommon(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
-        self._cIAppCc = ConfigInfoAppCc(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
+        self._siteId = str(self._reqObj.getValue("WWPDB_SITE_ID"))
+        self._cI = ConfigInfo(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
+        self._cICommon = ConfigInfoAppCommon(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
+        self._cIAppCc = ConfigInfoAppCc(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
         self.__sbTopPath = self._cIAppCc.get_site_refdata_top_cvs_sb_path()  # "/wwpdb_da/da_top/reference/components"
         self._ccProjectName = self._cI.get("SITE_REFDATA_PROJ_NAME_CC")  # "ligand-dict-v3"
-        self._crpi = ChemRefPathInfo(siteId=self.__siteId, verbose=self._verbose, log=self._lfh)
+        self._crpi = ChemRefPathInfo(siteId=self._siteId, verbose=self._verbose, log=self._lfh)
 
         self.__getSession()
         self._cvsAdmin = self.__setupCvs()
@@ -167,15 +168,29 @@ class ChemEditorBase:
         inputFilePath = os.path.join(workingPath, inFile)
         if not os.access(inputFilePath, os.R_OK):
             return
+        #
         outputFilePath = os.path.join(workingPath, "out.cif")
         self._removeFile(outputFilePath)
-        self._runCmd(self.__getAnnotateCompCmd(workingPath, inFile, "out.cif"))
+        #
+        dp = RcsbDpUtility(tmpPath=workingPath, siteId=self._siteId, verbose=self._verbose, log=self._lfh)
+        dp.setDebugMode(flag=True)
+        dp.imp(inputFilePath)
+        dp.addInput(name="opAnnot", value="'stereo-cactvs|aro-cactvs|descriptor-oe|descriptor-cactvs|descriptor-inchi|name-oe|name-acd|xyz-ideal-corina|xyz-model-h-oe|fix'")
+        #
+        rt = dp.op("chem-comp-annotate-comp")
+        if rt == 0:
+            dp.exp(outputFilePath)
+        #
+        dp.cleanup()
+        #
         if os.access(outputFilePath, os.R_OK):
             try:
                 os.rename(outputFilePath, inputFilePath)
             except:  # noqa: E722 pylint: disable=bare-except
                 self._removeFile(inputFilePath)
                 os.rename(outputFilePath, inputFilePath)
+            #
+        #
 
     def _runMatchComp(self, workingPath, inFile, outFile, option):
         """ """
@@ -229,19 +244,3 @@ class ChemEditorBase:
         cvs.setAuthInfo(user=cvsUsername, password=cvsPassword)
         cvs.setSandBoxTopPath(self.__sbTopPath)
         return cvs
-
-    def __getAnnotateCompCmd(self, workingPath, inFile, outFile):
-        """ """
-        cmd = (
-            "cd "
-            + workingPath
-            + " ; "
-            + self._ccToolsBashSetting()
-            + " ${CC_TOOLS}/annotateComp -vv -i "
-            + inFile
-            + " -op 'stereo-cactvs|aro-cactvs|descriptor-oe|descriptor-cactvs|descriptor-inchi|name-oe|name-acd|xyz-ideal-corina|xyz-model-h-oe|fix' "
-            + " -o "
-            + outFile
-            + " > _comp_log 2>&1 ; "
-        )
-        return cmd
