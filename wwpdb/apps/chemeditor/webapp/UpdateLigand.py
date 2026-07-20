@@ -160,6 +160,9 @@ class UpdateLigand(ChemEditorBase):
         dp.setDebugMode(flag=True)
         dp.imp(os.path.join(self._sessionPath, "in.cif"))
         #
+        if modelFile:
+            dp.addInput(name="pdb", value=modelFile, type="file")
+        #
         rt = dp.op("metal-metalcoord-update")
         if rt == 0:
             dp.expList(outputList)
@@ -387,18 +390,18 @@ class UpdateLigand(ChemEditorBase):
         #
         coordinationList = []
         findgeoJsonFile = self.__getFileFromParentSession("_findgeo-annotation.json")
-        if findgeoJsonFile:
+        if findgeoJsonFile and self.__isValidJsonFile(findgeoJsonFile, "FindGeo"):
             coordinationList.append(( "FindGeo", findgeoJsonFile ))
         #
         metalcoordJsonFile = self.__getFileFromParentSession("_metalcoord-annotation.json")
-        if metalcoordJsonFile:
+        if metalcoordJsonFile and self.__isValidJsonFile(metalcoordJsonFile, "MetalCoord"):
             coordinationList.append(( "MetalCoord", metalcoordJsonFile ))
         #
         ligandOnlyFlag = False
         modifiedMetalAtomNameMap = {}
         if len(coordinationList) == 0:
             metalCoordJsonFile = os.path.join(self._sessionPath, "metalcoord.json")
-            if os.access(metalCoordJsonFile, os.R_OK):
+            if os.access(metalCoordJsonFile, os.R_OK) and self.__isValidJsonFile(metalCoordJsonFile, "MetalCoord"):
                 coordinationList.append(( "MetalCoord", metalCoordJsonFile ))
                 ligandOnlyFlag = True
             else:
@@ -421,10 +424,16 @@ class UpdateLigand(ChemEditorBase):
                             #
                         #
                     #
-                    if (len(dataList) == 6) and (dataList[0] == ccId) and (not ligandOnlyFlag):
-                        # Update the metal atom name if it is changed inside chemical editor
-                        if dataList[1] in modifiedMetalAtomNameMap:
-                            dataList[1] = modifiedMetalAtomNameMap[dataList[1]]
+                    tag = ""
+                    if "tag" in coordObj:
+                        tag = str(coordObj["tag"])
+                    #
+                    if (len(dataList) == 6) and (dataList[0] == ccId) and (tag.lower() == "regular"):
+                        if not ligandOnlyFlag:
+                            # Update the metal atom name if it is changed inside chemical editor
+                            if dataList[1] in modifiedMetalAtomNameMap:
+                                dataList[1] = modifiedMetalAtomNameMap[dataList[1]]
+                            #
                         #
                         dataList[2] = int(dataList[2])
                         descriptor = ""
@@ -542,6 +551,27 @@ class UpdateLigand(ChemEditorBase):
             #
         #
         return annotationData,pcmList,chargeData
+
+    def __isValidJsonFile(self, jsonFilePath, program):
+        """ Check if the json file has valid data
+        """
+        try:
+            with open(jsonFilePath) as DATA:
+                jsonObj = json.load(DATA)
+                if len(jsonObj) == 0:
+                    self._lfh.write("Run '%s' failed: no return result.\n" % program)
+                    return False
+                #
+                if "error" in jsonObj:
+                    self._lfh.write("Run '%s' failed: %s.\n" % (program, jsonObj["error"]))
+                    return False
+                #
+            #
+        except:
+            traceback.print_exc(file=self._lfh)
+            return False
+        #
+        return True
 
     def __getModifiedMetalAtomNameMap(self, myBlock):
         """ Check if any atom name(s) has(ve) been changed inside chemical editor. Only return changed metal atom anme mapping.
@@ -696,8 +726,8 @@ class UpdateLigand(ChemEditorBase):
                         if isSameFlag:
                             existingFlag = True
                             for descriptor in dataVec1[7]:
-                                if descriptor not in dataVec2[i][7]:
-                                    dataVec2[i][7].append(descriptor)
+                                if descriptor not in dataVec2[7]:
+                                    dataVec2[7].append(descriptor)
                                 #
                             #
                             break
