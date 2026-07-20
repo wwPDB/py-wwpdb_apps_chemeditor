@@ -168,29 +168,25 @@ class ChemEditorBase:
         inputFilePath = os.path.join(workingPath, inFile)
         if not os.access(inputFilePath, os.R_OK):
             return
-        #
         outputFilePath = os.path.join(workingPath, "out.cif")
         self._removeFile(outputFilePath)
-        #
         dp = RcsbDpUtility(tmpPath=workingPath, siteId=self._siteId, verbose=self._verbose, log=self._lfh)
         dp.setDebugMode(flag=True)
         dp.imp(inputFilePath)
-        dp.addInput(name="opAnnot", value="'stereo-cactvs|aro-cactvs|descriptor-oe|descriptor-cactvs|descriptor-inchi|name-oe|name-acd|xyz-ideal-corina|xyz-model-h-oe|fix'")
-        #
+        dp.addInput(
+            name="opAnnot",
+            value="'stereo-cactvs|aro-cactvs|descriptor-oe|descriptor-cactvs|descriptor-inchi|name-oe|name-acd|xyz-ideal-corina|xyz-model-h-oe|fix'",
+        )
         rt = dp.op("chem-comp-annotate-comp")
         if rt == 0:
             dp.exp(outputFilePath)
-        #
         dp.cleanup()
-        #
         if os.access(outputFilePath, os.R_OK):
             try:
                 os.rename(outputFilePath, inputFilePath)
             except:  # noqa: E722 pylint: disable=bare-except
                 self._removeFile(inputFilePath)
                 os.rename(outputFilePath, inputFilePath)
-            #
-        #
 
     def _runMatchComp(self, workingPath, inFile, outFile, option):
         """ """

@@ -1,7 +1,8 @@
 import sys
 
-from wwpdb.apps.chemeditor.webapp.Utils import setupLog
 from wwpdb.utils.db.MyConnectionBase import MyConnectionBase
+
+from wwpdb.apps.chemeditor.webapp.Utils import setupLog
 
 
 class ConnectError(Exception):

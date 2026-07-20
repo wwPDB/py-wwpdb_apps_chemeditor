@@ -26,6 +26,11 @@ import os
 import sys
 import traceback
 
+from wwpdb.io.misc.SendEmail import SendEmail
+from wwpdb.utils.config.ConfigInfo import ConfigInfo
+from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCc
+from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
+
 from wwpdb.apps.chemeditor.webapp.AtomMatch import AtomMatch
 
 # from wwpdb.apps.chemeditor.webapp.ChemCompHash import ChemCompHash
@@ -39,10 +44,6 @@ from wwpdb.apps.chemeditor.webapp.SaveLigand import SaveLigand
 from wwpdb.apps.chemeditor.webapp.Search import Search
 from wwpdb.apps.chemeditor.webapp.UpdateLigand import UpdateLigand
 from wwpdb.apps.chemeditor.webapp.Upload import Upload
-from wwpdb.io.misc.SendEmail import SendEmail
-from wwpdb.utils.config.ConfigInfo import ConfigInfo
-from wwpdb.utils.config.ConfigInfoApp import ConfigInfoAppCc
-from wwpdb.utils.session.WebRequest import InputRequest, ResponseContent
 
 
 def threshold_crossed(pre, post, thresholdList):

@@ -17,7 +17,6 @@ import sys
 import traceback
 
 from mmcif.io.IoAdapterCore import IoAdapterCore
-
 from wwpdb.utils.db.ChemCompSchemaDef import ChemCompSchemaDef
 from wwpdb.utils.db.MyConnectionBase import MyConnectionBase
 from wwpdb.utils.db.MyDbUtil import MyDbQuery
@@ -148,7 +147,7 @@ class ChemCompDbUtil(MyConnectionBase):
         retIdList = []
         try:
             sql = (
-                'select comp_id from pdbx_chem_comp_descriptor where type = "'
+                'select comp_id from pdbx_chem_comp_descriptor where type = "'  # noqa: S608
                 + valueList[0]
                 + '" and program = "'
                 + valueList[1]
@@ -171,7 +170,7 @@ class ChemCompDbUtil(MyConnectionBase):
         retIdList = []
         try:
             sql = (
-                "select id from chem_comp where (pdbx_release_status != 'OBS') and ((pdbx_replaced_by is null) or (pdbx_replaced_by = '')) and id in ('"
+                "select id from chem_comp where (pdbx_release_status != 'OBS') and ((pdbx_replaced_by is null) or (pdbx_replaced_by = '')) and id in ('"  # noqa: S608
                 + "', '".join(inputCcdIdList)
                 + "')"
             )  # noqa: S608

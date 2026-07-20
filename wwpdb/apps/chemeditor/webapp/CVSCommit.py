@@ -33,11 +33,11 @@ from datetime import datetime
 from mmcif.api.DataCategory import DataCategory
 from mmcif.io.PdbxReader import PdbxReader
 from mmcif.io.PdbxWriter import PdbxWriter
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+from wwpdb.utils.dp.RcsbDpUtility import RcsbDpUtility
 
 from wwpdb.apps.chemeditor.webapp.ChemCompDbUtil import ChemCompDbUtil
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
-from wwpdb.io.file.mmCIFUtil import mmCIFUtil
-from wwpdb.utils.dp.RcsbDpUtility import RcsbDpUtility
 
 
 class CVSCommit(ChemEditorBase):

@@ -29,8 +29,9 @@ configMock = MagicMock(**configInfoMockConfig)
 sys.modules["wwpdb.utils.config.ConfigInfo"] = Mock(ConfigInfo=configMock)
 
 # These must be after the definitions - before wwpdb.utils.config imported anywhere
-from wwpdb.apps.chemeditor.webapp.ChemEditorWebApp import ChemEditorWebAppWorker, threshold_crossed  # noqa: E402
 from wwpdb.utils.session.WebRequest import InputRequest  # noqa: E402
+
+from wwpdb.apps.chemeditor.webapp.ChemEditorWebApp import ChemEditorWebAppWorker, threshold_crossed  # noqa: E402
 
 
 class ChemEditorWebAppTests(unittest.TestCase):

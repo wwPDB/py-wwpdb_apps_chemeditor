@@ -26,7 +26,7 @@ class ChemCompHash:
         try:
             i = self.chemCompIdToInt(ccId)
             return sites[i % len(sites)]
-        except:  # noqa: E722,TRY302  pylint: disable=bare-except,try-except-raise
+        except:  # noqa: E722,TRY203  pylint: disable=bare-except,try-except-raise
             raise
 
     def chemCompIdToInt(self, ccId):
@@ -67,7 +67,7 @@ class ChemCompHash:
         try:
             for i, c in enumerate(ccIdU[::-1]):
                 iret += cList.index(c) * pow(base, i)
-        except:  # noqa: E722,TRY302  pylint: disable=bare-except,try-except-raise
+        except:  # noqa: E722,TRY203  pylint: disable=bare-except,try-except-raise
             raise
 
         return iret

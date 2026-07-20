@@ -25,9 +25,10 @@ import os
 import sys
 from operator import itemgetter
 
+from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+
 from wwpdb.apps.chemeditor.webapp.ChemCompDbUtil import ChemCompDbUtil
 from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
-from wwpdb.io.file.mmCIFUtil import mmCIFUtil
 
 
 class Search(ChemEditorBase):

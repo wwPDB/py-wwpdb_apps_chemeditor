@@ -23,8 +23,9 @@ __version__ = "V0.07"
 
 import sys
 
-from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 from wwpdb.io.file.mmCIFUtil import mmCIFUtil
+
+from wwpdb.apps.chemeditor.webapp.ChemEditorBase import ChemEditorBase
 
 
 class GetLigand(ChemEditorBase):

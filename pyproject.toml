@@ -25,7 +25,7 @@ classifiers = [
 dependencies = [
     "wwpdb.apps.ccmodule >= 0.4",
     "wwpdb.io >= 0.34",
-    "wwpdb.utils.config >= 0.34",
+    "wwpdb.utils.config >= 1.0.1",
     "wwpdb.utils.db",
     "wwpdb.utils.session",
 ]
@@ -48,6 +48,9 @@ include = [
 packages = ["wwpdb"]
 
 #=================================== Ruff basics =============================#
+[tool.ruff]
+target-version = "py37"
+output-format = "concise"
 
 line-length = 120 # 120 is hatch's default via 'hatch init'
 include = [
@@ -63,7 +66,7 @@ include = [
 
 #
 # ------------------------- Ruff misc. options ----------------------
-preview = true
+preview = false
 explicit-preview-rules = true
 
 ignore = [
@@ -105,7 +108,7 @@ ignore = [
 # -------------------- default environment scripts ------------------
 [tool.hatch.envs.default]
 skip-install = true
-dependencies = ["mypy", "ruff >=0.6.9", "wwpdb.utils.testing"]
+dependencies = ["mypy", "ruff >=0.6.9", "wwpdb.io"]
 
 
 [tool.hatch.envs.default.scripts]
@@ -141,7 +144,7 @@ run = ["tox"]
 
 # -------------------------  Mypy disable ---------
 [[tool.mypy.overrides]]
-module = ["oslo_concurrency.*", "wwpdb.*", "mmcif.*"]
+module = ["oslo_concurrency.*", "wwpdb.io.*", "wwpdb.utils.dp.*", "wwpdb.apps.ccmodule.*", "wwpdb.utils.session.*", "wwpdb.utils.db.*", "mmcif.*"]
 ignore_missing_imports = true
 
 [tool.mypy]
