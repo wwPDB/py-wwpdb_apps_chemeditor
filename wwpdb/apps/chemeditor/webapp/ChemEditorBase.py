@@ -24,6 +24,8 @@ __version__ = "V0.07"
 import os
 import sys
 
+from mmcif.io.PdbxReader import PdbxReader
+from mmcif.io.PdbxWriter import PdbxWriter
 from wwpdb.io.cvs.CvsAdmin import CvsSandBoxAdmin
 from wwpdb.io.locator.ChemRefPathInfo import ChemRefPathInfo
 from wwpdb.utils.config.ConfigInfo import ConfigInfo
@@ -217,6 +219,56 @@ class ChemEditorBase:
         ofh = open(filePath, "w")
         ofh.write(cifData + "\n")
         ofh.close()
+
+    def _updateRedoxActiveMetalCharge(self, filePath):
+        """ """
+        self.__redoxActiveMetalElementList = [ "AU", "CE", "CO", "CR", "CU", "EU", "FE", "HG", "IR", "MN", "MO", "NI", "OS", \
+                                               "PB", "PD", "PT", "PU", "RE", "RH", "RU", "SN", "TA", "TI", "TL", "U", "V", "W" ]
+        # 
+        if not os.access(filePath, os.R_OK):
+            return
+        myDataList = []
+        ifh = open(filePath)
+        pdbxR = PdbxReader(ifh)
+        pdbxR.read(myDataList)
+        ifh.close()
+        myBlock = myDataList[0]
+        atomCat = myBlock.getObj("chem_comp_atom")
+        if atomCat:
+            has_redox_active_metal = False
+            total_charge = 0
+            for row in range(atomCat.getRowCount()):
+                try:
+                    atom_type = atomCat.getValue("type_symbol", row)
+                    if atom_type.upper() in self.__redoxActiveMetalElementList:
+                        atomCat.setValue("?", "charge", row)
+                        has_redox_active_metal = True
+                    else:
+                        try:
+                            charge = atomCat.getValue("charge", row)
+                            icharge = int(charge)
+                            total_charge += icharge
+                        except:  # noqa: E722 pylint: disable=bare-except
+                            pass
+                        #
+                    #
+                except:  # noqa: E722 pylint: disable=bare-except
+                    traceback.print_exc(file=self._lfh)
+                #
+            #
+            compCat = myBlock.getObj("chem_comp")
+            if compCat:
+                if has_redox_active_metal:
+                    compCat.setValue("?", "pdbx_formal_charge", 0)
+                else:
+                    compCat.setValue(str(total_charge), "pdbx_formal_charge", 0)
+                #
+            #
+            ofh = open(filePath, "w")
+            pdbxW = PdbxWriter(ofh)
+            pdbxW.write(myDataList)
+            ofh.close()
+        #
 
     def __getSession(self):
         """Join existing session or create new session as required."""

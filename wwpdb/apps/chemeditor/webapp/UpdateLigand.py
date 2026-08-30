@@ -205,6 +205,10 @@ class UpdateLigand(ChemEditorBase):
         if polyatomic_metal_flag == "yes":
             hasMetalCoordinationInfo = self.__runMetalCoordinationTools()
         self.__updateDefaultValue(hasMetalCoordinationInfo)
+        redox_active_metal_flag = str(self._reqObj.getValue("redox_active_metal"))
+        if redox_active_metal_flag == "yes":
+            self._updateRedoxActiveMetalCharge(os.path.join(self._sessionPath, "in.cif"))
+        #
         return self.__returnData()
 
     def __getCCLinkFile(self):
@@ -285,8 +289,8 @@ class UpdateLigand(ChemEditorBase):
             return
         myDataList = []
         ifh = open(cifFilePath)
-        pRd = PdbxReader(ifh)
-        pRd.read(myDataList)
+        pdbxR = PdbxReader(ifh)
+        pdbxR.read(myDataList)
         ifh.close()
         self.__updateCcIdForDataBlock(ccId, myDataList[0])
         ofh = open(cifFilePath, "w")
@@ -316,8 +320,8 @@ class UpdateLigand(ChemEditorBase):
             return
         myDataList = []
         ifh = open(filePath)
-        pRd = PdbxReader(ifh)
-        pRd.read(myDataList)
+        pdbxR = PdbxReader(ifh)
+        pdbxR.read(myDataList)
         ifh.close()
         myBlock = myDataList[0]
         compCat = myBlock.getObj("chem_comp")
@@ -378,7 +382,16 @@ class UpdateLigand(ChemEditorBase):
     def __integrateMetalCoordinationAnnotation(self, ccId, myBlock, compCat):
         """Read "servalcat.cif", "metalcoord.json", and "findgeo.json" result files."""
         idealCoordData = self.__readServalcatCif(ccId)
-        annotationData, pcmList, chargeData = self.__readCoordinationJson(ccId, myBlock)
+        pdbId = ""
+        if self.__pdbId:
+            pdbId = self.__pdbId
+        else:
+            pdbId = compCat.getValue("pdbx_model_coordinates_db_code", 0)
+            if (pdbId == "?") or (pdbId == "."):
+                pdbId = ""
+            #
+        #
+        annotationData, pcmList, chargeData = self.__readCoordinationJson(ccId, pdbId, myBlock)
         if len(idealCoordData) > 0:
             for atom_id, dataList in idealCoordData.items():
                 if atom_id in chargeData:
@@ -400,8 +413,8 @@ class UpdateLigand(ChemEditorBase):
         """Read "servalcat.cif" file"""
         myDataList = []
         ifh = open(os.path.join(self._sessionPath, "servalcat.cif"))
-        pRd = PdbxReader(ifh)
-        pRd.read(myDataList)
+        pdbxR = PdbxReader(ifh)
+        pdbxR.read(myDataList)
         ifh.close()
         idealCoordData = {}
         for dataBlock in myDataList:
@@ -434,7 +447,7 @@ class UpdateLigand(ChemEditorBase):
                 idealCoordData = {}
         return idealCoordData
 
-    def __readCoordinationJson(self, ccId, myBlock):
+    def __readCoordinationJson(self, ccId, pdbId, myBlock):
         """Read "metalcoord.json" and "findgeo.json" files."""
         annotationData = {}
         pcmList = []
@@ -483,6 +496,7 @@ class UpdateLigand(ChemEditorBase):
                             if (val != "") and (val != "?") and (val != ".") and (val.lower() != "irregular"):
                                 descriptor = val
                         dataList.append(resultTupl[0])
+                        dataList.append(pdbId)
                         if dataList[1] in annotationData:
                             foundSameAnnotation = False
                             for existList in annotationData[dataList[1]]:
@@ -495,23 +509,23 @@ class UpdateLigand(ChemEditorBase):
                                 foundSameAnnotation = True
                                 if descriptor != "":
                                     foundSameDescriptor = False
-                                    for existingDescriptor in existList[7]:
-                                        if existingDescriptor == descriptor:
+                                    for existingDescriptorTupl in existList[8]:
+                                        if existingDescriptorTupl[0] == descriptor:
                                             foundSameDescriptor = True
                                             break
                                     if not foundSameDescriptor:
-                                        existList[7].append(descriptor)
+                                        existList[8].append( (descriptor, pdbId) )
                                 break
                             if not foundSameAnnotation:
                                 descriptorList = []
                                 if descriptor != "":
-                                    descriptorList.append(descriptor)
+                                    descriptorList.append( (descriptor, pdbId) )
                                 dataList.append(descriptorList)
                                 annotationData[dataList[1]].append(dataList)
                         else:
                             descriptorList = []
                             if descriptor != "":
-                                descriptorList.append(descriptor)
+                                descriptorList.append( (descriptor, pdbId) )
                             dataList.append(descriptorList)
                             annotationData[dataList[1]] = [dataList]
                         if "sphere" in coordObj:
@@ -583,8 +597,8 @@ class UpdateLigand(ChemEditorBase):
             return modifiedMetalAtomNameMap
         myDataList = []
         ifh = open(ligandInstanceFile)
-        pRd = PdbxReader(ifh)
-        pRd.read(myDataList)
+        pdbxR = PdbxReader(ifh)
+        pdbxR.read(myDataList)
         ifh.close()
         orgCoordMetalAtomNameMap = self.__getCoordMetalAtomNameMap(myDataList[0])
         modCoordMetalAtomNameMap = self.__getCoordMetalAtomNameMap(myBlock)
@@ -693,10 +707,21 @@ class UpdateLigand(ChemEditorBase):
                                 isSameFlag = False
                         if isSameFlag:
                             existingFlag = True
-                            for descriptor in dataVec1[7]:
-                                if descriptor not in dataVec2[7]:
-                                    dataVec2[7].append(descriptor)
+                            for descriptorTupl1 in dataVec1[8]:
+                                isSameDescriptor = False
+                                for descriptorTupl2 in dataVec2[8]:
+                                    if descriptorTupl1[0] == descriptorTupl2[0]:
+                                        isSameDescriptor = True
+                                        break
+                                    #
+                                #
+                                if not isSameDescriptor:
+                                    dataVec2[8].append(descriptorTupl1)
+                                #
+                            #
                             break
+                        #
+                    #
                     if not existingFlag:
                         existingAnnotData[atom_id].append(dataVec1)
         allDataList = []
@@ -717,17 +742,18 @@ class UpdateLigand(ChemEditorBase):
                 keyMap[key] = str(len(keyMap) + 1)
             cDataList = []
             cDataList.append(keyMap[key])
-            for idx in range(7):
+            for idx in range(8):
                 cDataList.append(str(dataVec[idx]))
             coordDataList.append(cDataList)
-            for descriptor in dataVec[7]:
+            for descriptorTupl in dataVec[8]:
                 sDataList = []
                 sDataList.append(str(len(sphereDataList) + 1))
                 sDataList.append(keyMap[key])
                 sDataList.append(dataVec[0])
                 sDataList.append(dataVec[1])
-                sDataList.append(descriptor)
+                sDataList.append(descriptorTupl[0])
                 sDataList.append(dataVec[6])
+                sDataList.append(descriptorTupl[1])
                 sphereDataList.append(sDataList)
         if len(coordDataList) > 0:
             items = (
@@ -739,10 +765,11 @@ class UpdateLigand(ChemEditorBase):
                 "geometry_generic",
                 "geometry_abbr",
                 "provenance",
+                "representative_entry_id",
             )
             self.__updateCifDataObj(myBlock, "pdbx_chem_comp_atom_coordination", items, coordDataList)
         if len(sphereDataList) > 0:
-            items = ("id", "geometry_id", "comp_id", "atom_id", "descriptor", "provenance")
+            items = ("id", "geometry_id", "comp_id", "atom_id", "descriptor", "provenance", "representative_entry_id")
             self.__updateCifDataObj(myBlock, "pdbx_chem_comp_atom_coordination_sphere", items, sphereDataList)
 
     def __readCurrentChemCompAtomCoordinationCategories(self, myBlock):
@@ -756,6 +783,7 @@ class UpdateLigand(ChemEditorBase):
         dataMap = {}
         for row in range(coordCat.getRowCount()):
             dataVec = []
+            missingValue = False
             for itName in (
                 "comp_id",
                 "atom_id",
@@ -764,14 +792,21 @@ class UpdateLigand(ChemEditorBase):
                 "geometry_generic",
                 "geometry_abbr",
                 "provenance",
+                "representative_entry_id",
             ):
                 try:
                     val = coordCat.getValue(itName, row)
                     if (val is not None) and (val != "?") and (val != "."):
                         dataVec.append(val)
+                    else:
+                        dataVec.append("")
+                        if itName != "representative_entry_id":
+                            missingValue = True
+                        #
+                    #
                 except:  # noqa: E722 pylint: disable=bare-except
                     traceback.print_exc(file=self._lfh)
-            if len(dataVec) != 7:
+            if missingValue or (len(dataVec) != 8):
                 continue
             dataVec[2] = int(dataVec[2])
             dataVec.append([])
@@ -786,18 +821,25 @@ class UpdateLigand(ChemEditorBase):
         if sphereCat is not None:
             for row in range(sphereCat.getRowCount()):
                 dataVec = []
-                for itName in ("geometry_id", "comp_id", "atom_id", "provenance", "descriptor"):
+                missingValue = False
+                for itName in ("geometry_id", "comp_id", "atom_id", "provenance", "descriptor", "representative_entry_id"):
                     try:
                         val = sphereCat.getValue(itName, row)
                         if (val is not None) and (val != "?") and (val != "."):
                             dataVec.append(val)
+                        else:
+                            dataVec.append("")
+                            if itName != "representative_entry_id":
+                                missingValue = True
+                            #
+                        #
                     except:  # noqa: E722 pylint: disable=bare-except
                         traceback.print_exc(file=self._lfh)
-                if len(dataVec) != 5:
+                if missingValue or (len(dataVec) != 6):
                     continue
-                key = "_".join(dataVec[:-1])
+                key = "_".join(dataVec[:-2])
                 if key in dataMap:
-                    dataMap[key][7].append(dataVec[-1])
+                    dataMap[key][8].append( (dataVec[-2], dataVec[-1]) )
         for dataVec in dataMap.values():
             if dataVec[1] in existingAnnotData:
                 existingAnnotData[dataVec[1]].append(dataVec)
