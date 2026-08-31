@@ -396,7 +396,7 @@ class UpdateLigand(ChemEditorBase):
             for atom_id, dataList in idealCoordData.items():
                 if atom_id in chargeData:
                     dataList[0] = chargeData[atom_id]
-                else:
+                elif dataList[0] != "":
                     dataList[0] = str(int(float(dataList[0])))
             self.__updateChemCompAtomCategory(myBlock, compCat, idealCoordData)
         if len(annotationData) > 0:
