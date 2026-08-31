@@ -429,22 +429,30 @@ class UpdateLigand(ChemEditorBase):
                     break
             if itNameNotFound:
                 continue
-            incorrectData = False
             for row in range(atomCat.getRowCount()):
                 dataVec = []
+                missingValue = False
                 for itName in ("comp_id", "atom_id", "charge", "model_Cartn_x", "model_Cartn_y", "model_Cartn_z"):
                     try:
                         val = atomCat.getValue(itName, row)
                         if (val is not None) and (val != "?") and (val != "."):
                             dataVec.append(val)
+                        else:
+                            dataVec.append("")
+                            if itName != "charge":
+                                missingValue = True
+                            #
+                        #
                     except:  # noqa: E722 pylint: disable=bare-except
                         traceback.print_exc(file=self._lfh)
-                if (len(dataVec) != 6) or (dataVec[0] != ccId):
-                    incorrectData = True
-                    break
+                    #
+                #
+                if missingValue or (len(dataVec) != 6) or (dataVec[0] != ccId):
+                    continue
+                #
                 idealCoordData[dataVec[1]] = dataVec[2:]
-            if incorrectData:
-                idealCoordData = {}
+            #
+        #
         return idealCoordData
 
     def __readCoordinationJson(self, ccId, pdbId, myBlock):
