@@ -235,7 +235,6 @@ class CVSCommit(ChemEditorBase):
         f.close()
         if not os.access(self.__sourceFile, os.R_OK):
             return "CVS commit failed"
-        #
         self._updateRedoxActiveMetalCharge(self.__sourceFile)
         return ""
 

@@ -23,6 +23,7 @@ __version__ = "V0.07"
 
 import os
 import sys
+import traceback
 
 from mmcif.io.PdbxReader import PdbxReader
 from mmcif.io.PdbxWriter import PdbxWriter
@@ -222,9 +223,35 @@ class ChemEditorBase:
 
     def _updateRedoxActiveMetalCharge(self, filePath):
         """ """
-        self.__redoxActiveMetalElementList = [ "AU", "CE", "CO", "CR", "CU", "EU", "FE", "HG", "IR", "MN", "MO", "NI", "OS", \
-                                               "PB", "PD", "PT", "PU", "RE", "RH", "RU", "SN", "TA", "TI", "TL", "U", "V", "W" ]
-        # 
+        self.__redoxActiveMetalElementList = [  # pylint: disable=attribute-defined-outside-init
+            "AU",
+            "CE",
+            "CO",
+            "CR",
+            "CU",
+            "EU",
+            "FE",
+            "HG",
+            "IR",
+            "MN",
+            "MO",
+            "NI",
+            "OS",
+            "PB",
+            "PD",
+            "PT",
+            "PU",
+            "RE",
+            "RH",
+            "RU",
+            "SN",
+            "TA",
+            "TI",
+            "TL",
+            "U",
+            "V",
+            "W",
+        ]
         if not os.access(filePath, os.R_OK):
             return
         myDataList = []
@@ -250,25 +277,18 @@ class ChemEditorBase:
                             total_charge += icharge
                         except:  # noqa: E722 pylint: disable=bare-except
                             pass
-                        #
-                    #
                 except:  # noqa: E722 pylint: disable=bare-except
                     traceback.print_exc(file=self._lfh)
-                #
-            #
             compCat = myBlock.getObj("chem_comp")
             if compCat:
                 if has_redox_active_metal:
                     compCat.setValue("?", "pdbx_formal_charge", 0)
                 else:
                     compCat.setValue(str(total_charge), "pdbx_formal_charge", 0)
-                #
-            #
             ofh = open(filePath, "w")
             pdbxW = PdbxWriter(ofh)
             pdbxW.write(myDataList)
             ofh.close()
-        #
 
     def __getSession(self):
         """Join existing session or create new session as required."""
