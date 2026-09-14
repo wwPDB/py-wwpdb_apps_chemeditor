@@ -205,9 +205,9 @@ class UpdateLigand(ChemEditorBase):
         if polyatomic_metal_flag == "yes":
             hasMetalCoordinationInfo = self.__runMetalCoordinationTools()
         self.__updateDefaultValue(hasMetalCoordinationInfo)
-        redox_active_metal_flag = str(self._reqObj.getValue("redox_active_metal"))
-        if redox_active_metal_flag == "yes":
-            self._updateRedoxActiveMetalCharge(os.path.join(self._sessionPath, "in.cif"))
+#       redox_active_metal_flag = str(self._reqObj.getValue("redox_active_metal"))
+#       if redox_active_metal_flag == "yes":
+        self._updateRedoxActiveMetalCharge(os.path.join(self._sessionPath, "in.cif"))
         return self.__returnData()
 
     def __getCCLinkFile(self):
