@@ -280,21 +280,14 @@ class ChemEditorBase:
                             pass
                 except:  # noqa: E722 pylint: disable=bare-except
                     traceback.print_exc(file=self._lfh)
-                #
-            #
             if compCat:
                 if has_redox_active_metal:
                     compCat.setValue("?", "pdbx_formal_charge", 0)
                 else:
                     compCat.setValue(str(total_charge), "pdbx_formal_charge", 0)
-                #
-            #
-        #
         if compCat:
             self.__updateSubcomponentList(compCat)
-        #
         self.__removeEmptyRowsAndTables(myDataList[0])
-        #
         ofh = open(filePath, "w")
         pdbxW = PdbxWriter(ofh)
         pdbxW.write(myDataList)
@@ -324,44 +317,38 @@ class ChemEditorBase:
         return cvs
 
     def __updateSubcomponentList(self, compCat):
-        """ Change comma or semi-colon to space
-        """
+        """Change comma or semi-colon to space"""
         try:
             subcomponent = compCat.getValue("pdbx_subcomponent_list", 0)
             if (subcomponent == "?") or (subcomponent == "."):
                 return
-            #
             while True:
                 clean_subcomponent = subcomponent.replace(",", " ").replace(";", " ").replace("  ", " ").strip()
                 if clean_subcomponent == subcomponent:
                     break
-                #
                 subcomponent = clean_subcomponent
-            #
             compCat.setValue(subcomponent, "pdbx_subcomponent_list", 0)
         except:  # noqa: E722 pylint: disable=bare-except
             pass
-        #
 
     def __removeEmptyRowsAndTables(self, myBlock):
-        """ Check and remove empty row(s) for some pre-defined categories.
-            Check and remove empty category(ies)
-        """ 
-        checkList = ( ( "pdbx_chem_comp_atom_coordination", ( "geometry_id", "comp_id" ) ), \
-                      ( "pdbx_chem_comp_atom_coordination_sphere", ( "id", "geometry_id", "comp_id" ) ), \
-                      ( "pdbx_chem_comp_atom_related", ( "ordinal", "comp_id" ) ), \
-                      ( "pdbx_chem_comp_feature", ( "comp_id", ) ), \
-                      ( "pdbx_chem_comp_pcm", ( "pcm_id", "comp_id" ) ), \
-                      ( "pdbx_chem_comp_related", ( "comp_id", ) ), \
-                      ( "pdbx_chem_comp_synonyms", ( "ordinal", "comp_id" ) ) )
-        #
+        """Check and remove empty row(s) for some pre-defined categories.
+        Check and remove empty category(ies)
+        """
+        checkList = (
+            ("pdbx_chem_comp_atom_coordination", ("geometry_id", "comp_id")),
+            ("pdbx_chem_comp_atom_coordination_sphere", ("id", "geometry_id", "comp_id")),
+            ("pdbx_chem_comp_atom_related", ("ordinal", "comp_id")),
+            ("pdbx_chem_comp_feature", ("comp_id",)),
+            ("pdbx_chem_comp_pcm", ("pcm_id", "comp_id")),
+            ("pdbx_chem_comp_related", ("comp_id",)),
+            ("pdbx_chem_comp_synonyms", ("ordinal", "comp_id")),
+        )
         for catItemTupl in checkList:
             catObj = myBlock.getObj(catItemTupl[0])
             if catObj is None:
                 continue
-            #
             attrbuteList = catObj.getAttributeList()
-            #
             removeRowList = []
             for row in range(catObj.getRowCount()):
                 hasValue = False
@@ -370,29 +357,18 @@ class ChemEditorBase:
                     if (val is not None) and (val != "?") and (val != ".") and (itName not in catItemTupl[1]):
                         hasValue = True
                         break
-                    #
-                #
                 if hasValue:
                     continue
-                #
                 removeRowList.append(row)
-            #
             if len(removeRowList) > 0:
                 catObj.removeRows(removeRowList)
-            #
-        #
         removeCatList = []
         for objName in myBlock.getObjNameList():
             catObj = myBlock.getObj(objName)
             if catObj is None:
                 continue
-            #
             if catObj.getRowCount() == 0:
                 removeCatList.append(objName)
-            #
-        #
         if len(removeCatList) > 0:
             for objName in removeCatList:
                 myBlock.remove(objName)
-            #
-        #
