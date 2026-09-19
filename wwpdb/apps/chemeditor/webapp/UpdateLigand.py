@@ -660,6 +660,7 @@ class UpdateLigand(ChemEditorBase):
                 break
         if itNameNotFound:
             return
+        updated_ideal_coords = False
         has_redox_active_metal = False
         total_charge = 0
         for row in range(atomCat.getRowCount()):
@@ -670,6 +671,7 @@ class UpdateLigand(ChemEditorBase):
                     atomCat.setValue(idealCoordData[atom_id][1], "pdbx_model_Cartn_x_ideal", row)
                     atomCat.setValue(idealCoordData[atom_id][2], "pdbx_model_Cartn_y_ideal", row)
                     atomCat.setValue(idealCoordData[atom_id][3], "pdbx_model_Cartn_z_ideal", row)
+                    updated_ideal_coords = True
                 charge = atomCat.getValue("charge", row)
                 if (charge == "?") or (charge == "."):
                     has_redox_active_metal = True
@@ -681,6 +683,8 @@ class UpdateLigand(ChemEditorBase):
                         pass
             except:  # noqa: E722 pylint: disable=bare-except
                 traceback.print_exc(file=self._lfh)
+        if updated_ideal_coords:
+            compCat.setValue("MetalCoord", "pdbx_ideal_coordinates_details", 0)
         if has_redox_active_metal:
             compCat.setValue("?", "pdbx_formal_charge", 0)
         else:
